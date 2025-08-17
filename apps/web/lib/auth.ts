@@ -3,7 +3,8 @@ import { LoginSchema } from "@meta/types"
 import { compareSync } from "bcrypt-ts";
 import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
- 
+import GithubProvider from "next-auth/providers/github";
+
 export const {handlers, signIn, signOut, auth } = NextAuth({
     providers: [
         Credentials({
@@ -19,7 +20,8 @@ export const {handlers, signIn, signOut, auth } = NextAuth({
                     placeholder: "*****",
                 },
             },
-            async authorize(credentials) {
+            async authorize(credentials : object) {
+                console.log("Authorizing...", credentials)
                 try {
                     const parsed = await LoginSchema.safeParseAsync(credentials)
                     if (!parsed.success) throw new Error("Invalid credentials.")
@@ -31,7 +33,7 @@ export const {handlers, signIn, signOut, auth } = NextAuth({
                     })
                     if (!user) return null
 
-                    const isValid = await compareSync(password, user.password)
+                    const isValid = compareSync(password, user.password)
                     if (!isValid) throw new Error("Invalid credentials.")
 
                     return {
@@ -45,6 +47,10 @@ export const {handlers, signIn, signOut, auth } = NextAuth({
                 }
                 
             },
+        }),
+        GithubProvider({
+            clientId: process.env.GITHUB_CLIENT_ID,
+            clientSecret: process.env.GITHUB_CLIENT_SECRET,
         }),
     ],
     session: {
@@ -61,5 +67,6 @@ export const {handlers, signIn, signOut, auth } = NextAuth({
             }
             return token;
         }
-    }
+    },
+    secret: process.env.AUTH_SECRET,
 })

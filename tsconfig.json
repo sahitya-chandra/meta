@@ -10,7 +10,8 @@
     "outDir": "dist",
     "baseUrl": ".",
     "paths": {
-      "@meta/db": ["packages/db"]
+      "@meta/db": ["packages/db"],
+      "@meta/types": ["packages/types"]
     }
   }
 }

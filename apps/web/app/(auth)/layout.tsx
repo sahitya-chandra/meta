@@ -1,18 +1,18 @@
-// AuthLayout.tsx or AuthLayout.jsx
-'use client'; // This component needs to be a Client Component to use `useRouter` or `usePathname`
+
+'use client';
 
 import React from "react";
-import { useRouter } from "next/navigation"; // Import useRouter from next/navigation for App Router
+import { useRouter } from "next/navigation"; 
 
 const AuthLayout = ({ children }: { children: React.ReactNode }) => {
-  const router = useRouter(); // Initialize the Next.js router
+  const router = useRouter(); 
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 relative">
       <div
         className="h-16 flex flex-col items-center justify-center bg-black text-white font-bold text-lg group cursor-pointer" // Added cursor-pointer for better UX
         onClick={() => {
-          router.push("/"); // Use router.push() for navigation in Next.js
+          router.push("/");
         }}
       >
         <span className="group-hover:scale-x-170 group-hover:scale-y-150 group-hover:-translate-z-30 transition duration-1000">META</span>

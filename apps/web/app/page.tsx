@@ -1,13 +1,11 @@
 "use client"
 
-import { SessionProvider, useSession, signOut } from "next-auth/react"
+import { useSession, signOut } from "next-auth/react"
 import Head from "next/head"
 
 export default function Home() {
   return (
-    <SessionProvider>
-      <HomeContent />
-    </SessionProvider>
+    <HomeContent />
   )
 }
 
@@ -28,13 +26,13 @@ function HomeContent() {
       </Head>
 
       <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-blue-50 font-sans antialiased text-gray-800">
-        {session?.user?.email ? (
+        {session ? (
           // Show user profile
           <div className="flex flex-col items-center justify-center gap-4 flex-grow">
             <h2 className="text-3xl font-bold">
-              Welcome, {session.user.name || "User"}!
+              Welcome, {session?.user?.name || "User"}!
             </h2>
-            <p className="text-lg text-gray-700">Email: {session.user.email}</p>
+            <p className="text-lg text-gray-700">Email: {session?.user?.email}</p>
             <button
               onClick={() => signOut({ callbackUrl: "/" })}
               className="px-6 py-3 mt-4 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"

@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,4 +8,44 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String       @id @default(cuid())
+  email     String       @unique
+  name      String?
+  password  String
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  requestedFriendships Friendship[] @relation("RequestedFriendships")
+  receivedFriendships  Friendship[] @relation("ReceivedFriendships")
+  sentMessages         Message[]    @relation("SentMessages")
+  receivedMessages     Message[]    @relation("ReceivedMessages")
+}
+
+enum Status {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+model Friendship {
+  id          String   @id @default(cuid())
+  requester   User     @relation("RequestedFriendships", fields: [requesterId], references: [id])
+  requesterId String
+  addressee   User     @relation("ReceivedFriendships", fields: [addresseeId], references: [id])
+  addresseeId String
+  status      Status   @default(PENDING)
+  createdAt   DateTime @default(now())
+}
+
+model Message {
+  id         String   @id @default(cuid())
+  sender     User     @relation("SentMessages", fields: [senderId], references: [id])
+  senderId   String
+  receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  receiverId String
+  content    String
+  createdAt  DateTime @default(now())
 }

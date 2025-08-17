@@ -1,5 +1,5 @@
 {
-  "name": "@meta/utils",
+  "name": "@meta/types",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
@@ -8,8 +8,5 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
-  "dependencies": {
-    "zod": "^4.0.17"
-  }
+  "description": ""
 }

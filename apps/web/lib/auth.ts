@@ -60,6 +60,13 @@ export const {handlers, signIn, signOut, auth } = NextAuth({
                 token.email = user.email;
             }
             return token;
-        }
+        },
+        async session({ session, token }) {
+            if (token) {
+                session.user.id = token.id as string;
+                session.user.email = token.email as string;
+            }
+            return session;
+        },
     }
 })

@@ -13,7 +13,7 @@ export const {handlers, signIn, signOut, auth } = NextAuth({
                     label: "Email",
                     placeholder: "johndoe@gmail.com",
                 },
-                    password: {
+                password: {
                     type: "password",
                     label: "Password",
                     placeholder: "*****",
@@ -29,14 +29,10 @@ export const {handlers, signIn, signOut, auth } = NextAuth({
                     const user = await prisma.user.findUnique({
                         where: { email },
                     })
-                    console.log("user:", user)
                     if (!user) return null
 
                     const isValid = await compareSync(password, user.password)
                     if (!isValid) throw new Error("Invalid credentials.")
-
-                    // if (!response.ok) return null
-                    // return (await response.json()) ?? null
 
                     return {
                         id: user.id,
@@ -53,6 +49,9 @@ export const {handlers, signIn, signOut, auth } = NextAuth({
     ],
     session: {
         strategy: "jwt",
+    },
+    pages: {
+        signIn: "/signin",
     },
     callbacks: {
         async jwt({token, user}) {

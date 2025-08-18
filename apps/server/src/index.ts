@@ -1,9 +1,18 @@
 import express from "express";
+import prisma from "@meta/db";
+import cors from "cors";
+
+import friendRoutes from "./Routes/route.js";
 
 const app = express();
 
 // Middleware
 app.use(express.json());
+app.use(cors());
+
+// Routes
+app.use("/api", friendRoutes); 
+
 
 // Test route
 app.get("/", (req, res) => {

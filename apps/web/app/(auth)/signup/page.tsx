@@ -12,6 +12,7 @@ export default function SignUpPage() {
   const router = useRouter()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [name, setName] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -24,7 +25,7 @@ export default function SignUpPage() {
       const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, name }),
       })
 
       if (!res.ok) {
@@ -36,10 +37,11 @@ export default function SignUpPage() {
         redirect: false,
         email,
         password,
+        name,
       })
 
       if (result?.error) {
-        setError("Login failed, please try again.")
+        setError("Signup failed, please try again.")
       } else {
         router.replace("/")
       }
@@ -62,6 +64,14 @@ export default function SignUpPage() {
 
         <CardContent>
           <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
+            <Input
+              placeholder="Name"
+              type="text"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="py-3 px-4"
+            />
             <Input
               placeholder="Email"
               type="email"

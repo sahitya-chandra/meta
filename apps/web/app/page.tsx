@@ -13,7 +13,7 @@ function HomeContent() {
   const { data: session, status } = useSession()
 
   if (status === "loading") return <p>Loading...</p>
-
+  console.log(session)
   return (
     <>
       <Head>
@@ -40,6 +40,8 @@ function HomeContent() {
               Sign Out
             </button>
             <div>THIS IS ONLY FOR TRIAL</div>
+            <a href="/friendreq" className="text-blue-600 hover:underline bg-amber-400 rounded m-2 p-2">Go to Friend Requests</a>
+            <a href="/friendlist" className="text-blue-600 hover:underline bg-amber-400 rounded m-2 p-2">Go to Friend List</a>
           </div>
         ) : (
           // Hero Section for guests

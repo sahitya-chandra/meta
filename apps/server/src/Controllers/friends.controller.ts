@@ -3,12 +3,12 @@ import { Request, Response } from "express";
 import { z } from "zod";
 
 const sendFriendRequestSchema = z.object({
-  selfId: z.string().uuid(),
-  friendId: z.string().uuid(),
+  selfId: z.string(),
+  friendId: z.string(),
 });
 
 const friendRequestActionSchema = z.object({
-  requestId: z.string().uuid(),
+  requestId: z.string(),
 });
 
 export const getUserByEmail = async (req: Request, res: Response) => {
@@ -43,13 +43,14 @@ export const getFriendRequests = async (req: Request, res: Response) => {
         addresseeId: userId,
         status: "PENDING",
       },
-      include: {
+      select: {
+        id : true ,
         requester: {
           select: { id: true, name: true, email: true },
-        },
+        }
       },
     });
-
+    console.log("Friend requests fetched:", requests);
     res.json(requests);
   } catch (error) {
     console.error("Error fetching friend requests:", error);
@@ -60,7 +61,7 @@ export const getFriendRequests = async (req: Request, res: Response) => {
 export const sendFriendRequest = async (req: Request, res: Response) => {
   const parsed = sendFriendRequestSchema.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ error: parsed.error.format() });
+    return res.status(400).json({ msg : "Not valid due to type" });
   }
 
   const { selfId, friendId } = parsed.data;
@@ -127,10 +128,11 @@ export const getFriends = async (req: Request, res: Response) => {
         userB: { select: { id: true, name: true, email: true } },
       },
     });
-
+    console.log("Friendships fetched:", friendships);
     const friends = friendships.map((f) =>
       f.userAId === userId ? f.userB : f.userA
     );
+    console.log("Friends fetched:", friends);
 
     res.json(friends);
   } catch (error) {
@@ -144,7 +146,7 @@ export const acceptFriendRequest = async (req: Request, res: Response) => {
   if (!parsed.success) {
     return res.status(400).json({ error: parsed.error.format() });
   }
-
+  console.log("Accepting friend request:", parsed.data);
   const { requestId } = parsed.data;
 
   try {

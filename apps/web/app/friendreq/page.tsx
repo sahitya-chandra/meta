@@ -10,7 +10,8 @@ const FriendRequestPage = () => {
 
   const { data: session } = useSession();
   const selfId = session?.user.id;
-  console.log("Self ID:", selfId);
+  // console.log("Self ID:", selfId);
+  // console.log("Session data:", session);
 
   useEffect(() => {
     const fetchRequests = async () => {
@@ -27,7 +28,7 @@ const FriendRequestPage = () => {
 
   const handleSearch = async () => {
     if (!query) return;
-    const res = await fetch(`http://localhost:4000/api/addfriend/${query}`);
+    const res = await fetch(`http://localhost:4000/api/users?email=${query}`);
     const data = await res.json();
     console.log(data);
 
@@ -40,22 +41,25 @@ const FriendRequestPage = () => {
   };
 
   const handleSendRequest = async (friendId: string) => {
-    await fetch("http://localhost:4000/api/friendreq", {
+   const resp = await fetch("http://localhost:4000/api/friend-requests", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ selfId, friendId }),
     });
+    console.log({selfId, friendId});
     alert("Friend request sent!");
     setSearchResult(null);
     setQuery("");
   };
 
   const handleAccept = async (id: string) => {
+    console.log("Accepting friend request with ID:", id);
     await fetch("http://localhost:4000/api/accept-friend-request", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ friendshipId: id }),
+      body: JSON.stringify({ requestId: id }),
     });
+    console.log("Accepted friend request:", id);
     setRequests((prev) => prev.filter((r) => r.id !== id));
   };
 
@@ -63,7 +67,7 @@ const FriendRequestPage = () => {
     await fetch("http://localhost:4000/api/reject-friend-request", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ friendshipId: id }),
+      body: JSON.stringify({ requestId: id }),
     });
     setRequests((prev) => prev.filter((r) => r.id !== id));
   };

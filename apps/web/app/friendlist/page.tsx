@@ -6,12 +6,14 @@ const FriendListPage = () => {
   const [friends, setFriends] = useState<any[]>([]);
   const { data: session } = useSession();
   const selfId = session?.user.id;
+  // console.log("Session data:", session);
+  // console.log("Self ID:", selfId);
 
   useEffect(() => {
     if (!selfId) return;
     const fetchFriends = async () => {
       try {
-        console.log("Fetching friends for selfId:", selfId);
+        //console.log("Fetching friends for selfId:", selfId);
         const res = await fetch(`http://localhost:4000/api/friends/${selfId}`);
         const data = await res.json();
         console.log("Fetched friends:", data);

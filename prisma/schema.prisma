@@ -18,26 +18,40 @@ model User {
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
 
-  requestedFriendships Friendship[] @relation("RequestedFriendships")
-  receivedFriendships  Friendship[] @relation("ReceivedFriendships")
-  sentMessages         Message[]    @relation("SentMessages")
-  receivedMessages     Message[]    @relation("ReceivedMessages")
+  sentRequests     FriendRequest[] @relation("SentRequests")
+  receivedRequests FriendRequest[] @relation("ReceivedRequests")
+  friendsA         Friend[]        @relation("FriendsA")
+  friendsB         Friend[]        @relation("FriendsB")
+  sentMessages     Message[]       @relation("SentMessages")
+  receivedMessages Message[]       @relation("ReceivedMessages")
 }
 
-enum Status {
+model FriendRequest {
+  id          String   @id @default(cuid())
+  requester   User     @relation("SentRequests", fields: [requesterId], references: [id])
+  requesterId String
+  addressee   User     @relation("ReceivedRequests", fields: [addresseeId], references: [id])
+  addresseeId String
+  status      RequestStatus @default(PENDING)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum RequestStatus {
   PENDING
   ACCEPTED
   REJECTED
 }
 
-model Friendship {
-  id          String   @id @default(cuid())
-  requester   User     @relation("RequestedFriendships", fields: [requesterId], references: [id])
-  requesterId String
-  addressee   User     @relation("ReceivedFriendships", fields: [addresseeId], references: [id])
-  addresseeId String
-  status      Status   @default(PENDING)
-  createdAt   DateTime @default(now())
+model Friend {
+  id      String @id @default(cuid())
+  userA   User   @relation("FriendsA", fields: [userAId], references: [id])
+  userAId String
+  userB   User   @relation("FriendsB", fields: [userBId], references: [id])
+  userBId String
+  createdAt DateTime @default(now())
+
+  @@unique([userAId, userBId])
 }
 
 model Message {

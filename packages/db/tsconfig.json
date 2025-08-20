@@ -3,9 +3,10 @@
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": ".",
-    "composite": true,         // allow project references if you use them later
-    "declaration": true,       // emit .d.ts files
-    "declarationMap": true
+    "declaration": true,
+    "declarationMap": true,
+    "module": "commonjs",
+    "target": "es2019"
   },
   "include": ["index.ts"],
   "exclude": ["node_modules", "dist"]

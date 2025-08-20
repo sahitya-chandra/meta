@@ -1,6 +1,8 @@
 import prisma from "@meta/db";
 import { Request, Response } from "express";
 import { z } from "zod";
+import { userSockets } from "../utils/utils";
+import { io } from "..";
 
 const sendFriendRequestSchema = z.object({
   selfId: z.string(),
@@ -106,7 +108,17 @@ export const sendFriendRequest = async (req: Request, res: Response) => {
         requesterId: selfId,
         addresseeId: friendId,
       },
+      include: {
+        requester: {
+          select: { id: true, name: true, email: true }
+        }
+      }
     });
+
+    const recipientSocketId = userSockets.get(friendId);
+    if (recipientSocketId) {
+      io.to(recipientSocketId).emit("friendRequest", request);
+    }
 
     res.json(request);
   } catch (error) {

@@ -1,17 +1,28 @@
 import { Server, Socket } from 'socket.io';
-import { userSockets } from '../utils';
-import { authMiddleware } from './auth';
+import { userSockets } from '../utils/utils';
 import { AuthenticatedSocket } from '../types';
 import prisma from '@meta/db';
+import { wsAuthMiddleware } from '../middleware/socketAuth.middleware';
 
 export const setupSockets = (io: Server) => {
-  io.use(authMiddleware);
+  io.use(wsAuthMiddleware);
 
-  io.on('connection', (socket: AuthenticatedSocket) => {
+  io.on('connection', async (socket: AuthenticatedSocket) => {
     if (!socket.userId) return socket.disconnect();
 
     userSockets.set(socket.userId, socket.id);
     console.log(`User ${socket.userId} connected with socket ${socket.id}`);
+
+    const pendingRequests = await prisma.friendRequest.findMany({
+      where: { addresseeId: socket.userId, status: "PENDING" },
+      include: {
+        requester: { select: { id: true, name: true, email: true } },
+      },
+    });
+
+    if (pendingRequests.length > 0) {
+      socket.emit("friendRequests", pendingRequests);
+    }
 
     socket.on('sendMessage', async (payload: { toUserId: string; content: string }) => {
       console.log("payload:", payload)

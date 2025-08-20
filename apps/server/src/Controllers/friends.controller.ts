@@ -3,9 +3,10 @@ import { Request, Response } from "express";
 import { z } from "zod";
 import { userSockets } from "../utils/utils";
 import { io } from "..";
+import { AuthenticatedRequest } from "../types";
 
 const sendFriendRequestSchema = z.object({
-  selfId: z.string(),
+  selfId: z.string().optional(),
   friendId: z.string(),
 });
 
@@ -36,8 +37,9 @@ export const getUserByEmail = async (req: Request, res: Response) => {
   }
 };
 
-export const getFriendRequests = async (req: Request, res: Response) => {
-  const { userId } = req.params;
+export const getFriendRequests = async (req: AuthenticatedRequest, res: Response) => {
+  const userId = req.userId;
+  if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
   try {
     const requests = await prisma.friendRequest.findMany({
@@ -46,13 +48,12 @@ export const getFriendRequests = async (req: Request, res: Response) => {
         status: "PENDING",
       },
       select: {
-        id : true ,
+        id: true,
         requester: {
           select: { id: true, name: true, email: true },
-        }
+        },
       },
     });
-    console.log("Friend requests fetched:", requests);
     res.json(requests);
   } catch (error) {
     console.error("Error fetching friend requests:", error);
@@ -60,13 +61,16 @@ export const getFriendRequests = async (req: Request, res: Response) => {
   }
 };
 
-export const sendFriendRequest = async (req: Request, res: Response) => {
+export const sendFriendRequest = async (req: AuthenticatedRequest, res: Response) => {
+  const selfId = req.userId;
+  if (!selfId) return res.status(401).json({ error: "Unauthorized" });
+
   const parsed = sendFriendRequestSchema.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({ msg : "Not valid due to type" });
   }
 
-  const { selfId, friendId } = parsed.data;
+  const { friendId } = parsed.data;
 
   try {
     if (selfId === friendId) {
@@ -127,8 +131,10 @@ export const sendFriendRequest = async (req: Request, res: Response) => {
   }
 };
 
-export const getFriends = async (req: Request, res: Response) => {
-  const { userId } = req.params;
+export const getFriends = async (req: AuthenticatedRequest, res: Response) => {
+  const userId  = req.userId;
+
+  if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
   try {
     const friendships = await prisma.friend.findMany({
@@ -153,24 +159,34 @@ export const getFriends = async (req: Request, res: Response) => {
   }
 };
 
-export const acceptFriendRequest = async (req: Request, res: Response) => {
+export const acceptFriendRequest = async (req: AuthenticatedRequest, res: Response) => {
+  const userId = req.userId;
+  if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
   const parsed = friendRequestActionSchema.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ error: parsed.error.format() });
+    return res.status(400).json({ error: parsed.error });
   }
   console.log("Accepting friend request:", parsed.data);
   const { requestId } = parsed.data;
 
   try {
-    const request = await prisma.friendRequest.update({
+    const request = await prisma.friendRequest.findUnique({
+      where: { id: requestId },
+    });
+    if (!request || request.addresseeId !== userId) {
+      return res.status(403).json({ error: "Not authorized to accept this request" });
+    }
+
+    const updatedRequest = await prisma.friendRequest.update({
       where: { id: requestId },
       data: { status: "ACCEPTED" },
     });
 
     const friendship = await prisma.friend.create({
       data: {
-        userAId: request.requesterId,
-        userBId: request.addresseeId,
+        userAId: updatedRequest.requesterId,
+        userBId: updatedRequest.addresseeId,
       },
     });
 
@@ -181,15 +197,25 @@ export const acceptFriendRequest = async (req: Request, res: Response) => {
   }
 };
 
-export const rejectFriendRequest = async (req: Request, res: Response) => {
+export const rejectFriendRequest = async (req: AuthenticatedRequest, res: Response) => {
+  const userId = req.userId;
+  if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
   const parsed = friendRequestActionSchema.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ error: parsed.error.format() });
+    return res.status(400).json({ error: parsed.error });
   }
 
   const { requestId } = parsed.data;
 
   try {
+    const request = await prisma.friendRequest.findUnique({
+      where: { id: requestId },
+    });
+    if (!request || request.addresseeId !== userId) {
+      return res.status(403).json({ error: "Not authorized to accept this request" });
+    }
+    
     const updated = await prisma.friendRequest.update({
       where: { id: requestId },
       data: { status: "REJECTED" },

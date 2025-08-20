@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { decryptToken } from "../utils/authhelper";
+import { AuthenticatedRequest } from "../types";
 
 export const httpAuthMiddleware = async (
   req: Request,
@@ -28,7 +29,7 @@ export const httpAuthMiddleware = async (
       return res.status(401).json({ error: "Invalid token payload" });
     }
 
-    (req as any).userId = payload.sub;
+    (req as AuthenticatedRequest).userId = payload.sub;
     next();
   } catch (err) {
     console.error("HTTP auth error:", err);

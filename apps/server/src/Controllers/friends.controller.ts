@@ -61,10 +61,11 @@ export const getFriendRequests = async (req: AuthenticatedRequest, res: Response
   }
 };
 
+
 export const sendFriendRequest = async (req: AuthenticatedRequest, res: Response) => {
   const selfId = req.userId;
   if (!selfId) return res.status(401).json({ error: "Unauthorized" });
-
+  console.log("Body:", req.body);
   const parsed = sendFriendRequestSchema.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({ msg : "Not valid due to type" });
@@ -133,7 +134,7 @@ export const sendFriendRequest = async (req: AuthenticatedRequest, res: Response
 
 export const getFriends = async (req: AuthenticatedRequest, res: Response) => {
   const userId  = req.userId;
-
+  console.log("Fetching friends for user:", userId);
   if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
   try {
@@ -162,7 +163,7 @@ export const getFriends = async (req: AuthenticatedRequest, res: Response) => {
 export const acceptFriendRequest = async (req: AuthenticatedRequest, res: Response) => {
   const userId = req.userId;
   if (!userId) return res.status(401).json({ error: "Unauthorized" });
-
+  console.log("Body:", req.body);
   const parsed = friendRequestActionSchema.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({ error: parsed.error });

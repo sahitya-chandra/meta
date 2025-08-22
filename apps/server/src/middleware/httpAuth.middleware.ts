@@ -24,12 +24,14 @@ export const httpAuthMiddleware = async (
       return res.status(401).json({ error: "No token provided" });
     }
 
+    console.log("Token by md :", token)
     const payload = await decryptToken(token, true);
     if (!payload?.sub) {
       return res.status(401).json({ error: "Invalid token payload" });
     }
 
     (req as AuthenticatedRequest).userId = payload.sub;
+    console.log("Request body:", req.body);
     next();
   } catch (err) {
     console.error("HTTP auth error:", err);

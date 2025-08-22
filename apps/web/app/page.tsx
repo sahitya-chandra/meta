@@ -1,5 +1,6 @@
 "use client"
 
+import Loader from "@/components/ui/loader"
 import { useSession, signOut } from "next-auth/react"
 import Head from "next/head"
 
@@ -12,8 +13,8 @@ export default function Home() {
 function HomeContent() {
   const { data: session, status } = useSession()
 
-  if (status === "loading") return <p>Loading...</p>
-  console.log(session)
+  if (status === "loading") return <Loader />
+
   return (
     <>
       <Head>

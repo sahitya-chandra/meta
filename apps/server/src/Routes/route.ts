@@ -12,7 +12,7 @@ import { httpAuthMiddleware } from "../middleware/httpAuth.middleware";
 const router = express.Router();
 
 router.get("/users", getUserByEmail);
-router.get("/friends/:userId", httpAuthMiddleware, getFriends);
+router.get("/friends", httpAuthMiddleware, getFriends);
 router.get("/friend-requests/:userId", httpAuthMiddleware, getFriendRequests);
 router.post("/friend-requests", httpAuthMiddleware, sendFriendRequest);
 router.post("/accept-friend-request", httpAuthMiddleware, acceptFriendRequest);

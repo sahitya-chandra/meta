@@ -16,7 +16,7 @@ export default function FriendReq() {
     const fetchRequests = async () => {
       if (!selfId) return
       const res = await fetch(
-        `http://localhost:4000/api/friend-requests/${selfId}`
+        `${process.env.NEXT_PUBLIC_API_URL}/api/friend-requests/${selfId}`
       )
       const data = await res.json()
       console.log(data)
@@ -27,7 +27,7 @@ export default function FriendReq() {
 
   const handleSearch = async () => {
     if (!query) return
-    const res = await fetch(`http://localhost:4000/api/users?email=${query}`)
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users?email=${query}`)
     const data = await res.json()
     console.log(data)
 
@@ -40,7 +40,7 @@ export default function FriendReq() {
   }
 
   const handleSendRequest = async (friendId: string) => {
-    const resp = await fetch("http://localhost:4000/api/friend-requests", {
+    const resp = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/friend-requests`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ selfId, friendId }),
@@ -53,7 +53,7 @@ export default function FriendReq() {
 
   const handleAccept = async (id: string) => {
     console.log("Accepting friend request with ID:", id)
-    await fetch("http://localhost:4000/api/accept-friend-request", {
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/accept-friend-request`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ requestId: id }),
@@ -63,7 +63,7 @@ export default function FriendReq() {
   }
 
   const handleReject = async (id: string) => {
-    await fetch("http://localhost:4000/api/reject-friend-request", {
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/reject-friend-request`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ requestId: id }),

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react"
 import { useSession } from "next-auth/react"
 
-export default function FriendList() {
+export default function FriendList({ token }: { token: any }) {
   const [friends, setFriends] = useState<any[]>([])
   const { data: session } = useSession()
   const selfId = session?.user?.id
@@ -11,12 +11,28 @@ export default function FriendList() {
   useEffect(() => {
     if (!selfId) return
 
-    const fetchFriends = async () => {
+    const fetchFriends = () => {
       try {
-        const res = await fetch(`http://localhost:4000/api/friends/${selfId}`)
-        const data = await res.json()
-        console.log("Fetched friends:", data)
-        setFriends(data)
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/friends`, {
+          method: "GET",
+          headers: { 
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }).then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log(data);
+          console.log("Fetched friends:", data)
+          setFriends(data)
+        })
+        .catch(error => {
+          console.error("Error fetching data:", error);
+        });
       } catch (err) {
         console.error("Error fetching friends:", err)
       }

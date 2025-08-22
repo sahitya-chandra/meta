@@ -18,7 +18,7 @@ const ChatPage = () => {
     if (!userId) return;
     const fetchFriends = async () => {
       try {
-        const res = await fetch(`http://localhost:4000/api/friends/${userId}`);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/friends/${userId}`);
         const data = await res.json();
         console.log("Fetched friends:", data);
         setFriends(data || []);

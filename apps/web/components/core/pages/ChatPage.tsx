@@ -3,22 +3,41 @@
 import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import Loader from "@/components/ui/loader";
+import Nav from "@/components/ui/nav";
 
 const ChatPage = ({ token }: { token: string }) => {
   const { data: session } = useSession();
   const [loading, setLoading] = useState(true);
   const [friends, setFriends] = useState<any[]>([]);
-  const [chats, setChats] = useState<any[]>([]);
-  const [chatterId, setChattingId] = useState<string>("");
+  const [activeChatId, setActiveChatId] = useState<string>("");
+  const [theme, setTheme] = useState("light");
+  const [message, setMessage] = useState("");
 
   const userId = session?.user?.id;
 
-  const handleUser = (id: string) => {
-    setChattingId(id);
+  // Handle friend click
+  const handleSelectFriend = (id: string) => {
+    setActiveChatId(id);
   };
 
+  // Theme handling
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme") || "light";
+    setTheme(savedTheme);
+    document.documentElement.classList.toggle("dark", savedTheme === "dark");
+  }, []);
+
+  const toggleTheme = () => {
+    const newTheme = theme === "dark" ? "light" : "dark";
+    setTheme(newTheme);
+    document.documentElement.classList.toggle("dark", newTheme === "dark");
+    localStorage.setItem("theme", newTheme);
+  };
+
+  // Fetch friends
   useEffect(() => {
     if (!userId || !token) return;
+
     const fetchFriends = async () => {
       setLoading(true);
       try {
@@ -32,9 +51,7 @@ const ChatPage = ({ token }: { token: string }) => {
             },
           }
         );
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         const data = await res.json();
         setFriends(data || []);
       } catch (err) {
@@ -43,67 +60,145 @@ const ChatPage = ({ token }: { token: string }) => {
         setLoading(false);
       }
     };
+
     fetchFriends();
   }, [userId, token]);
 
+  // Loading screen
   if (loading) return <Loader />;
 
   return (
-    <div className="grid grid-cols-[350px_1fr] h-screen bg-gray-900 text-gray-200">
-      <div className="flex flex-col bg-gray-800 border-r border-gray-700">
-        <div className="p-4 font-bold text-lg border-b border-gray-700">
-          Friends
-        </div>
-        <div className="flex-1 overflow-y-auto">
-          {friends.length === 0 ? (
-            <p className="p-3 text-gray-400">No friends yet</p>
-          ) : (
-            friends.map((req: any) => (
-              <li
-                key={req.id}
-                onClick={() => handleUser(req.id)}
-                className={`p-3 cursor-pointer rounded transition ${
-                  chatterId === req.id
-                    ? "bg-amber-400 text-gray-900 font-semibold"
-                    : "hover:bg-gray-700"
-                }`}
-              >
-                {req.name}
-              </li>
-            ))
-          )}
-        </div>
-      </div>
+    <div
+      className="grid grid-rows-[60px_1fr] h-screen"
+      style={{ background: "var(--background)", color: "var(--foreground)" }}
+    >
+      <Nav toggleTheme={toggleTheme} theme={theme} />
 
-      <div className="flex flex-col bg-gray-900">
-        {chatterId === "" ? (
-          <div className="flex-1 flex items-center justify-center text-gray-400">
-            Select a friend to start chatting
+      {/* Body */}
+      <div className="grid grid-cols-[280px_1fr]">
+        {/* Sidebar */}
+        <aside
+          className="flex flex-col"
+          style={{
+            background: "var(--muted)",
+            borderRight: "1px solid var(--muted-foreground)",
+          }}
+        >
+          <div
+            className="p-4 font-semibold"
+            style={{ borderBottom: "1px solid var(--muted-foreground)" }}
+          >
+            Friends
           </div>
-        ) : (
-          <>
-            <div className="p-4 border-b border-gray-700 font-semibold bg-gray-800">
-              Chat with{" "}
-              {friends.find((f) => f.id === chatterId)?.name || "Friend"}
+          <ul className="flex-1 overflow-y-auto">
+            {friends.length === 0 ? (
+              <p className="p-3" style={{ color: "var(--muted-foreground)" }}>
+                No friends yet
+              </p>
+            ) : (
+              friends.map((friend) => (
+                <li
+                  key={friend.id}
+                  onClick={() => handleSelectFriend(friend.id)}
+                  className="p-3 cursor-pointer rounded transition-colors"
+                  style={{
+                    background:
+                      activeChatId === friend.id
+                        ? "var(--special)"
+                        : "transparent",
+                    color:
+                      activeChatId === friend.id
+                        ? "var(--background)"
+                        : "var(--foreground)",
+                  }}
+                >
+                  {friend.name || friend.email}
+                </li>
+              ))
+            )}
+          </ul>
+        </aside>
+
+        {/* Chat area */}
+        <main className="flex flex-col">
+          {activeChatId === "" ? (
+            <div
+              className="flex-1 flex items-center justify-center text-center"
+              style={{ color: "var(--muted-foreground)" }}
+            >
+              Select a friend to start chatting
             </div>
-            <div className="flex-1 p-4 overflow-y-auto space-y-2">
-              <div className="bg-gray-700 p-2 rounded-lg w-fit">Hi there!</div>
-              <div className="bg-green-600 p-2 rounded-lg w-fit ml-auto">
-                Hello 👋
+          ) : (
+            <>
+              {/* Chat header */}
+              <div
+                className="p-4 font-semibold"
+                style={{
+                  background: "var(--muted)",
+                  borderBottom: "1px solid var(--muted-foreground)",
+                }}
+              >
+                Chat with{" "}
+                {friends.find((f) => f.id === activeChatId)?.name || "Friend"}
               </div>
-            </div>
-            <div className="p-4 border-t border-gray-700 flex gap-2 bg-gray-800">
-              <input
-                type="text"
-                placeholder="Type a message"
-                className="flex-1 bg-gray-700 text-gray-200 border border-gray-600 rounded-full px-4 py-2 focus:outline-none"
-              />
-              <button className="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded-full">
-                Send
-              </button>
-            </div>
-          </>
-        )}
+
+              {/* Messages */}
+              <div className="flex-1 p-4 overflow-y-auto space-y-3">
+                {/* Sample messages */}
+                <div
+                  className="p-2 rounded-lg w-fit"
+                  style={{ background: "var(--muted)" }}
+                >
+                  Hi there!
+                </div>
+                <div
+                  className="p-2 rounded-lg w-fit ml-auto"
+                  style={{
+                    background: "var(--special)",
+                    color: "var(--background)",
+                  }}
+                >
+                  Hello 👋
+                </div>
+              </div>
+
+              {/* Message input */}
+              <form
+                className="p-4 flex gap-2"
+                style={{ borderTop: "1px solid var(--muted-foreground)" }}
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (!message.trim()) return;
+                  console.log("Send:", message);
+                  setMessage("");
+                }}
+              >
+                <input
+                  type="text"
+                  placeholder="Type a message"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  className="flex-1 rounded-full px-4 py-2 focus:outline-none"
+                  style={{
+                    background: "var(--muted)",
+                    color: "var(--foreground)",
+                    border: "1px solid var(--muted-foreground)",
+                  }}
+                />
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-full font-medium"
+                  style={{
+                    background: "var(--special)",
+                    color: "var(--background)",
+                  }}
+                >
+                  Send
+                </button>
+              </form>
+            </>
+          )}
+        </main>
       </div>
     </div>
   );

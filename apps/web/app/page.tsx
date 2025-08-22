@@ -1,97 +1,104 @@
 "use client"
 
 import Loader from "@/components/ui/loader"
+import Nav from "@/components/ui/nav"
 import { useSession, signOut } from "next-auth/react"
 import Head from "next/head"
+import { useEffect, useState, useRef } from "react"
 
 export default function Home() {
-  return (
-    <HomeContent />
-  )
+  return <HomeContent />
 }
 
 function HomeContent() {
   const { data: session, status } = useSession()
+  const [theme, setTheme] = useState("light")
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("theme")
+      if (saved) {
+        setTheme(saved)
+        document.documentElement.classList.toggle("dark", saved === "dark")
+      }
+    }
+  }, [])
+
+  const toggleTheme = () => {
+    const newTheme = theme === "dark" ? "light" : "dark"
+    setTheme(newTheme)
+    document.documentElement.classList.toggle("dark", newTheme === "dark")
+    localStorage.setItem("theme", newTheme)
+  }
 
   if (status === "loading") return <Loader />
 
   return (
     <>
       <Head>
-        <title>META - Connect Instantly, Chat Securely</title>
-        <meta
-          name="description"
-          content="Connect instantly with friends and colleagues. Send messages, create groups, and stay connected anytime, anywhere with ChatApp."
-        />
+        <title>ChatApp</title>
+        <meta name="description" content="Connect instantly, chat securely with ChatApp." />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-blue-50 font-sans antialiased text-gray-800">
-        {session ? (
-          // Show user profile
-          <div className="flex flex-col items-center justify-center gap-4 flex-grow">
-            <h2 className="text-3xl font-bold">
-              Welcome, {session?.user?.name || "User"}!
-            </h2>
-            <p className="text-lg text-gray-700">Email: {session?.user?.email}</p>
-            <button
-              onClick={() => signOut({ callbackUrl: "/" })}
-              className="px-6 py-3 mt-4 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
-            >
-              Sign Out
-            </button>
-            <div>THIS IS ONLY FOR TRIAL</div>
-            <a href="/friendreq" className="text-blue-600 hover:underline bg-amber-400 rounded m-2 p-2">Go to Friend Requests</a>
-            <a href="/friendlist" className="text-blue-600 hover:underline bg-amber-400 rounded m-2 p-2">Go to Friend List</a>
-            <a href="/chatpage" className="text-blue-600 hover:underline bg-amber-400 rounded m-2 p-2">Go to Chatting Area</a>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background font-sans antialiased text-foreground relative transition-colors overflow-hidden">
+        {theme === "dark" && <div className="absolute inset-0 w-full h-full bg-[linear-gradient(to_right,#e5e5e5_1px,transparent_1px),linear-gradient(to_bottom,#e5e5e5_1px,transparent_1px)] bg-[size:40px_40px] opacity-20" />}
 
+        <Nav toggleTheme={toggleTheme} theme={theme} />
+
+        {session ? (
+          <div className="flex flex-col items-center justify-center flex-grow p-4 sm:p-12 w-full max-w-7xl mx-auto mt-20 animate-fade-in z-10">
+            <div className="bg-background/60 rounded-2xl shadow-xl p-8 sm:p-12 w-full max-w-xl text-center backdrop-blur-sm">
+              <h2 className="text-4xl font-bold mb-2">
+                Welcome, <span className="text-[var(--special)]">{session?.user?.name || "User"}</span>!
+              </h2>
+              <p className="text-lg text-muted-foreground mb-8">Ready to chat? Select an option below.</p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+                <a href="/friendreq" className="group block p-6 rounded-xl border border-muted bg-background hover:shadow-lg hover:-translate-y-1 transition-all">
+                  <h3 className="text-lg font-semibold group-hover:text-[var(--special)]">Friend Requests</h3>
+                  <p className="text-sm text-muted-foreground mt-1">Manage incoming requests.</p>
+                </a>
+                <a href="/friendlist" className="group block p-6 rounded-xl border border-muted bg-background hover:shadow-lg hover:-translate-y-1 transition-all">
+                  <h3 className="text-lg font-semibold group-hover:text-[var(--special)]">Friend List</h3>
+                  <p className="text-sm text-muted-foreground mt-1">See who you're connected with.</p>
+                </a>
+                <a href="/chatpage" className="group block col-span-1 md:col-span-2 p-6 rounded-xl bg-[var(--special)] text-background hover:shadow-lg hover:opacity-90 transition-all">
+                  <h3 className="text-lg font-bold">Go to Chat</h3>
+                  <p className="text-sm mt-1 opacity-90">Start a conversation now.</p>
+                </a>
+              </div>
+              
+              <button
+                onClick={() => signOut({ callbackUrl: "/" })}
+                className="mt-8 w-full px-6 py-3 rounded-lg font-semibold bg-muted text-foreground hover:bg-muted-foreground hover:text-background transition-colors shadow-sm"
+              >
+                Sign Out
+              </button>
+            </div>
           </div>
         ) : (
-          // Hero Section for guests
-          <section className="flex flex-col-reverse lg:flex-row items-center justify-center px-6 sm:px-12 py-24 gap-16 lg:gap-32 flex-grow max-w-7xl mx-auto w-full">
-            {/* Text content */}
-            <div className="flex-1 text-center lg:text-left space-y-8 animate-fade-in-up">
-              <h1 className="text-6xl md:text-7xl font-extrabold text-gray-900 leading-tight tracking-tight">
-                <span className="block text-blue-600 drop-shadow-md">ChatApp</span>
-                Your World,{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-                  Connected
-                </span>
-                .
-              </h1>
-              <p className="text-gray-700 text-xl max-w-md mx-auto lg:mx-0 leading-relaxed">
-                Connect instantly with friends and colleagues. Send messages, create groups, and stay connected anytime, anywhere.
-              </p>
-              <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-5 mt-10">
-                <a
-                  href="/signin"
-                  className="px-8 py-4 bg-blue-600 text-white font-bold rounded-full shadow-xl hover:bg-blue-700 transform hover:scale-105 transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-blue-300 focus:ring-opacity-75"
-                >
-                  Sign In
-                </a>
-                <a
-                  href="/signup"
-                  className="px-8 py-4 border-2 border-gray-300 text-gray-800 font-semibold rounded-full hover:bg-gray-100 transform hover:scale-105 transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-gray-200 focus:ring-opacity-75"
-                >
-                  Sign Up
-                </a>
+          <div className="flex flex-col items-center justify-center flex-grow text-center w-full mt-20 z-10">
+            <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-20">
+              <div className="max-w-4xl mx-auto space-y-6">
+                <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-tight animate-fade-in-down">
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--special)] to-blue-600 drop-shadow-md">Connect</span>{" "}
+                  Instantly, Chat <span className="text-[var(--special)]">Securely</span>.
+                </h1>
+                <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto animate-fade-in-up">
+                  The simplest way to connect with friends, family, and colleagues. Fast, private, and always available.
+                </p>
+                <div className="pt-6 flex justify-center gap-4 animate-fade-in-up">
+                  <a href="/signin" className="px-8 py-4 rounded-full bg-[var(--special)] text-background font-bold shadow-md hover:shadow-lg hover:-translate-y-1 transition-all">
+                    Sign in
+                  </a>
+                  <a href="/signup" className="px-8 py-4 rounded-full border-2 border-white text-foreground font-semibold hover:bg-muted  hover:-translate-y-1 transition-all bg-[var(--background)]">
+                    Sign up
+                  </a>
+                </div>
               </div>
-            </div>
-
-            {/* Illustration / Placeholder */}
-            <div className="flex-1 flex justify-center items-center p-4">
-              <div className="relative w-[420px] h-[420px] bg-gradient-to-br from-blue-100 to-indigo-200 rounded-full shadow-2xl flex items-center justify-center animate-blob transform transition-transform duration-1000 ease-in-out hover:scale-105 group">
-                <div className="absolute inset-4 rounded-full bg-white opacity-10 blur-xl"></div>
-                <svg
-                  className="w-56 h-56 text-blue-600 opacity-75 group-hover:text-blue-700 transition-colors duration-300"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 14v-2h8v2H6zm10 0h2v-2h-2v2zm0-4h2V8h-2v2zM6 8h8v2H6V8z" />
-                </svg>
-              </div>
-            </div>
-          </section>
+            </section>
+          </div>
         )}
       </div>
     </>

@@ -1,75 +1,101 @@
-"use client"
+"use client";
 
-import React, { useEffect, useState } from "react"
-import { useSession } from "next-auth/react"
-import Link from "next/link"
+import React, { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import Link from "next/link";
 
-export default function FriendReq() {
-  const [requests, setRequests] = useState<any[]>([])
-  const [query, setQuery] = useState("")
-  const [searchResult, setSearchResult] = useState<any | null>(null)
+export default function FriendReq({ token }: { token?: any }) {
+  const [requests, setRequests] = useState<any[]>([]);
+  const [query, setQuery] = useState("");
+  const [searchResult, setSearchResult] = useState<any | null>(null);
 
-  const { data: session } = useSession()
-  const selfId = session?.user?.id
+  const { data: session } = useSession();
+  const selfId = session?.user?.id;
 
   useEffect(() => {
     const fetchRequests = async () => {
-      if (!selfId) return
+      if (!selfId) return;
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/friend-requests/${selfId}`
-      )
-      const data = await res.json()
-      console.log(data)
-      setRequests(data)
-    }
-    fetchRequests()
-  }, [selfId])
+        `${process.env.NEXT_PUBLIC_API_URL}/api/friend-requests/${selfId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const data = await res.json();
+      console.log(data);
+      setRequests(data);
+    };
+    fetchRequests();
+  }, [selfId]);
 
   const handleSearch = async () => {
-    if (!query) return
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users?email=${query}`)
-    const data = await res.json()
-    console.log(data)
+    if (!query) return;
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/users?email=${query}`
+    );
+    const data = await res.json();
+    console.log(data);
 
     if (res.ok) {
-      setSearchResult(data)
+      setSearchResult(data);
     } else {
-      setSearchResult(null)
-      alert(data.error)
+      setSearchResult(null);
+      alert(data.error);
     }
-  }
+  };
 
   const handleSendRequest = async (friendId: string) => {
-    const resp = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/friend-requests`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ selfId, friendId }),
-    })
-    console.log({ selfId, friendId })
-    alert("Friend request sent!")
-    setSearchResult(null)
-    setQuery("")
-  }
+    const resp = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/friend-requests`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ selfId, friendId }),
+        credentials: "include",
+      }
+    );
+    console.log({ selfId, friendId });
+    alert("Friend request sent!");
+    setSearchResult(null);
+    setQuery("");
+  };
 
   const handleAccept = async (id: string) => {
-    console.log("Accepting friend request with ID:", id)
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/accept-friend-request`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ requestId: id }),
-    })
-    console.log("Accepted friend request:", id)
-    setRequests((prev) => prev.filter((r) => r.id !== id))
-  }
+    console.log("Accepting friend request with ID:", id);
+    await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/accept-friend-request`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ requestId: id }),
+      }
+    );
+    console.log("Accepted friend request:", id);
+    setRequests((prev) => prev.filter((r) => r.id !== id));
+  };
 
   const handleReject = async (id: string) => {
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/reject-friend-request`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ requestId: id }),
-    })
-    setRequests((prev) => prev.filter((r) => r.id !== id))
-  }
+    await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/reject-friend-request`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ requestId: id }),
+      }
+    );
+    setRequests((prev) => prev.filter((r) => r.id !== id));
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -150,5 +176,5 @@ export default function FriendReq() {
         )}
       </div>
     </div>
-  )
+  );
 }

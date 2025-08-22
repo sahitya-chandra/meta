@@ -10,7 +10,7 @@ export default function FriendList({ token }: { token: any }) {
 
   useEffect(() => {
     if (!selfId) return
-
+    console.log("Token FL :", token)
     const fetchFriends = () => {
       try {
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/friends`, {

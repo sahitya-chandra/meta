@@ -1,24 +1,41 @@
 "use client";
-import React, { useState, useEffect } from "react";
+
+import React, { useState, useEffect, use } from "react";
 import { useSession } from "next-auth/react";
 
-const ChatPage = () => {
+const ChatPage = ({ token }: { token: string }) => {
   const { data: session } = useSession();
   const [friends, setFriends] = useState<any[]>([]);
-  const userId = session?.user?.id;
   const [chats, setChats] = useState<any[]>([]);
   const [chatterId, setChattingId] = useState<string>("");
 
-  const handleuser = (id: string) => {
+  const userId = session?.user?.id;
+
+  const handleUser = (id: string) => {
     setChattingId(id);
     console.log("Selected friend id:", id);
   };
 
   useEffect(() => {
-    if (!userId) return;
+    if (!userId || !token) return;
+
     const fetchFriends = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/friends/${userId}`);
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/friends`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+
         const data = await res.json();
         console.log("Fetched friends:", data);
         setFriends(data || []);
@@ -26,8 +43,10 @@ const ChatPage = () => {
         console.error("Error fetching friends:", err);
       }
     };
+
     fetchFriends();
-  }, [userId]);
+  }, [userId, token]);
+
 
   return (
     <div className="grid grid-cols-[350px_1fr] h-screen bg-gray-900 text-gray-200">
@@ -54,7 +73,7 @@ const ChatPage = () => {
             friends.map((req: any) => (
               <li
                 key={req.id}
-                onClick={() => handleuser(req.id)}
+                onClick={() => handleUser(req.id)}
                 className={`p-3 cursor-pointer rounded transition active:bg-white
                   ${
                     chatterId === req.id
@@ -72,7 +91,6 @@ const ChatPage = () => {
       {/* Chat Window */}
       <div className="flex flex-col bg-gray-900">
         {chatterId === "" ? (
-          // No friend selected
           <div className="flex-1 flex items-center justify-center text-gray-400">
             Select a friend to start chatting
           </div>

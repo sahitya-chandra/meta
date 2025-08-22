@@ -26,7 +26,6 @@ export default function FriendList({ token }: { token: any }) {
           return response.json();
         })
         .then(data => {
-          console.log(data);
           console.log("Fetched friends:", data)
           setFriends(data)
         })
@@ -37,7 +36,7 @@ export default function FriendList({ token }: { token: any }) {
         console.error("Error fetching friends:", err)
       }
     }
-
+    
     fetchFriends()
   }, [selfId])
 

@@ -1,24 +1,57 @@
-"use client";
+'use client'
 
 import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import Loader from "@/components/ui/loader";
 import Nav from "@/components/ui/nav";
+import { Message, useChat } from "@/hooks/useChat";
 
-const ChatPage = ({ token }: { token: string }) => {
+const ChatPage = ({ token }: { token: any }) => {
   const { data: session } = useSession();
   const [loading, setLoading] = useState(true);
   const [friends, setFriends] = useState<any[]>([]);
   const [activeChatId, setActiveChatId] = useState<string>("");
   const [theme, setTheme] = useState("light");
   const [message, setMessage] = useState("");
-
-  const userId = session?.user?.id;
+  const userId: string = session?.user?.id as string;
+  const [allChats, setAllChats] = useState<Message[]>([]);
+  const { messages, typingUser, sendMessage, sendTyping } = useChat(userId, token);
 
   // Handle friend click
   const handleSelectFriend = (id: string) => {
     setActiveChatId(id);
+    setAllChats([]);
   };
+
+  useEffect(() => {
+    if (!activeChatId || !token) return;
+
+    const fetchMessages = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/messages?friendId=${activeChatId}&since=${new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        const data = await res.json();
+        console.log("Fetched messages:", data);
+        // Only set messages that aren't already in the WebSocket messages
+        setAllChats(data.filter((msg: Message) => !messages.some((m) => m.id === msg.id)));
+      } catch (err) {
+        console.error("Error fetching messages:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMessages();
+  }, [activeChatId, token]);
 
   // Theme handling
   useEffect(() => {
@@ -53,6 +86,7 @@ const ChatPage = ({ token }: { token: string }) => {
         );
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         const data = await res.json();
+        console.log("Fetched friends:", data)
         setFriends(data || []);
       } catch (err) {
         console.error("Error fetching friends:", err);
@@ -63,6 +97,14 @@ const ChatPage = ({ token }: { token: string }) => {
 
     fetchFriends();
   }, [userId, token]);
+
+  const handleSubmit = (e: any) => {
+    e.preventDefault();
+    if (!message.trim()) return;
+    console.log("Sending message:", message)
+    sendMessage(activeChatId, message)
+    setMessage("");
+  }
 
   // Loading screen
   if (loading) return <Loader />;
@@ -144,34 +186,41 @@ const ChatPage = ({ token }: { token: string }) => {
 
               {/* Messages */}
               <div className="flex-1 p-4 overflow-y-auto space-y-3">
-                {/* Sample messages */}
-                <div
-                  className="p-2 rounded-lg w-fit"
-                  style={{ background: "var(--muted)" }}
-                >
-                  Hi there!
-                </div>
-                <div
-                  className="p-2 rounded-lg w-fit ml-auto"
-                  style={{
-                    background: "var(--special)",
-                    color: "var(--background)",
-                  }}
-                >
-                  Hello 👋
-                </div>
+                {[...allChats, ...messages]
+                  .filter(
+                    (msg, index, self) =>
+                      index === self.findIndex((m) => m.id === msg.id)
+                  )
+                  .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+                  .map((msg) => (
+                    <div
+                      key={msg.id}
+                      className={
+                        msg.senderId !== userId
+                          ? "p-2 rounded-lg w-fit"
+                          : "p-2 rounded-lg w-fit ml-auto"
+                      }
+                      style={{
+                        background:
+                          msg.senderId !== userId
+                            ? "var(--muted)"
+                            : "var(--special)",
+                        color:
+                          msg.senderId !== userId
+                            ? "var(--foreground)"
+                            : "var(--background)",
+                      }}
+                    >
+                      {msg.content}
+                    </div>
+                  ))}
               </div>
 
               {/* Message input */}
               <form
                 className="p-4 flex gap-2"
                 style={{ borderTop: "1px solid var(--muted-foreground)" }}
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  if (!message.trim()) return;
-                  console.log("Send:", message);
-                  setMessage("");
-                }}
+                onSubmit={handleSubmit}
               >
                 <input
                   type="text"

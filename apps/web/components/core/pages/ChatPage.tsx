@@ -1,15 +1,16 @@
 'use client'
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, FormEvent } from "react";
 import { useSession } from "next-auth/react";
 import Loader from "@/components/ui/loader";
 import Nav from "@/components/ui/nav";
-import { Message, useChat } from "@/hooks/useChat";
+import { useChat } from "@/hooks/useChat";
+import { Friend, Message } from "@/lib/types";
 
-const ChatPage = ({ token }: { token: any }) => {
+const ChatPage = ({ token }: { token: string | undefined }) => {
   const { data: session } = useSession();
   const [loading, setLoading] = useState(true);
-  const [friends, setFriends] = useState<any[]>([]);
+  const [friends, setFriends] = useState<Friend[]>([]);
   const [activeChatId, setActiveChatId] = useState<string>("");
   const [theme, setTheme] = useState("light");
   const [message, setMessage] = useState("");
@@ -98,7 +99,7 @@ const ChatPage = ({ token }: { token: any }) => {
     fetchFriends();
   }, [userId, token]);
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (!message.trim()) return;
     console.log("Sending message:", message)

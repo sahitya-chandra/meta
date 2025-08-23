@@ -28,6 +28,7 @@ const ChatPage = ({ token }: { token: string | undefined }) => {
   };
 
   const handleSelectFriend = (id: string) => {
+    if(id === activeChatId) return
     setActiveChatId(id);
     setAllChats([]);
     setSidebarOpen(false); // close sidebar on mobile
@@ -42,7 +43,10 @@ const ChatPage = ({ token }: { token: string | undefined }) => {
         const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/messages?friendId=${activeChatId}&since=${since}`,
-          { headers: { Authorization: `Bearer ${token}` } }
+          { 
+            method: "GET",
+            headers: { Authorization: `Bearer ${token}` } 
+          }
         );
         if (!res.ok) throw new Error(`HTTP error! ${res.status}`);
         const data = await res.json();
@@ -81,6 +85,7 @@ const ChatPage = ({ token }: { token: string | undefined }) => {
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/friends`,
           {
+            method: "GET",
             headers: { Authorization: `Bearer ${token}` },
           }
         );
@@ -159,7 +164,7 @@ const ChatPage = ({ token }: { token: string | undefined }) => {
           }`}
         >
           <div
-            className="p-4 font-semibold"
+            className="p-5 font-semibold"
             style={{ borderBottom: "1px solid var(--muted-foreground)" }}
           >
             Friends

@@ -11,7 +11,7 @@ export default function FriendList({ token }: { token: string }) {
   const { data: session } = useSession();
   const [theme, setTheme] = useState("light");
 
-  const selfId = session?.user?.id;
+  const userId = session?.user?.id;
 
   // Theme persistence
   useEffect(() => {
@@ -33,7 +33,7 @@ export default function FriendList({ token }: { token: string }) {
 
   // Fetch friends
   useEffect(() => {
-    if (!selfId) return;
+    if (!userId || !token) return;
     const fetchFriends = async () => {
       setLoading(true);
       try {
@@ -53,7 +53,7 @@ export default function FriendList({ token }: { token: string }) {
       }
     };
     fetchFriends();
-  }, [selfId, token]);
+  }, [userId, token]);
 
   return (
     <div className="min-h-screen bg-background text-foreground">

@@ -228,3 +228,37 @@ export const rejectFriendRequest = async (req: AuthenticatedRequest, res: Respon
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+export const getMessages = async (req: AuthenticatedRequest, res: Response) => {
+  const userId = req.userId;
+  if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+  const parsed = sendFriendRequestSchema.safeParse(req.query);
+  if (!parsed.success) {
+    return res.status(400).json({ error: parsed.error });
+  }
+
+  const { friendId } = parsed.data;
+  const since = req.query.since ? new Date(req.query.since as string) : undefined;
+
+  try {
+    const messages = await prisma.message.findMany({
+      where: {
+        OR: [
+          { senderId: userId, receiverId: friendId },
+          { senderId: friendId, receiverId: userId },
+        ],
+        ...(since ? { createdAt: { gte: since } } : {}),
+      },
+      orderBy: {
+        createdAt: "asc",
+      },
+    });
+
+    console.log("Messages fetched:", messages);
+    res.status(200).json(messages);
+  } catch (error) {
+    console.error("Error fetching messages:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};

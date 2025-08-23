@@ -1,6 +1,5 @@
 import prisma from "@meta/db";
 import { Request, Response } from "express";
-import { z } from "zod";
 import { userSockets } from "../utils/utils";
 import { io } from "..";
 import { AuthenticatedRequest } from "../types";

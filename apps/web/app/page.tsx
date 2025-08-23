@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import Loader from "@/components/ui/loader"
 import Nav from "@/components/ui/nav"

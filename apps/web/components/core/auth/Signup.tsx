@@ -1,12 +1,14 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { signIn } from "next-auth/react"
+import Nav from "@/components/ui/nav"
+import Loader from "@/components/ui/loader" // ✅ import Loader
 
 export default function Signup() {
   const router = useRouter()
@@ -15,6 +17,23 @@ export default function Signup() {
   const [name, setName] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [theme, setTheme] = useState("light")
+  const [themeLoading, setThemeLoading] = useState(true) // ✅ new state
+
+  // Load theme
+  useEffect(() => {
+    const saved = localStorage.getItem("theme") || "light"
+    setTheme(saved)
+    document.documentElement.classList.toggle("dark", saved === "dark")
+    setThemeLoading(false) // ✅ done loading
+  }, [])
+
+  const toggleTheme = () => {
+    const newTheme = theme === "dark" ? "light" : "dark"
+    setTheme(newTheme)
+    document.documentElement.classList.toggle("dark", newTheme === "dark")
+    localStorage.setItem("theme", newTheme)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -37,7 +56,6 @@ export default function Signup() {
         redirect: false,
         email,
         password,
-        name,
       })
 
       if (result?.error) {
@@ -56,12 +74,24 @@ export default function Signup() {
     }
   }
 
+  // ✅ Show Loader while theme is loading
+  if (themeLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <Loader />
+      </div>
+    )
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-      <Card className="w-full max-w-md shadow-xl border border-gray-200">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4 transition-colors">
+      <Nav toggleTheme={toggleTheme} theme={theme} />
+      <Card className="w-full max-w-md shadow-xl border border-gray-200 dark:border-gray-700 dark:bg-gray-800">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Create Your Account</CardTitle>
-          <CardDescription className="text-gray-600">
+          <CardTitle className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+            Create Your Account
+          </CardTitle>
+          <CardDescription className="text-gray-600 dark:text-gray-400">
             Sign up to start chatting instantly
           </CardDescription>
         </CardHeader>
@@ -74,7 +104,7 @@ export default function Signup() {
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="py-3 px-4"
+              className="py-3 px-4 dark:bg-gray-700 dark:text-gray-100"
             />
             <Input
               placeholder="Email"
@@ -82,7 +112,7 @@ export default function Signup() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="py-3 px-4"
+              className="py-3 px-4 dark:bg-gray-700 dark:text-gray-100"
             />
             <Input
               placeholder="Password"
@@ -91,7 +121,7 @@ export default function Signup() {
               minLength={6}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="py-3 px-4"
+              className="py-3 px-4 dark:bg-gray-700 dark:text-gray-100"
             />
 
             {error && <p className="text-red-500 text-sm">{error}</p>}
@@ -103,15 +133,15 @@ export default function Signup() {
             <Button
               type="button"
               variant="outline"
-              className="w-full bg-transparent py-3"
+              className="w-full bg-transparent py-3 dark:border-gray-600 dark:text-gray-200"
               onClick={() => signIn("github", { callbackUrl: "/" })}
             >
               Sign Up with GitHub
             </Button>
 
-            <p className="text-center text-sm text-gray-500 mt-2">
+            <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-2">
               Already have an account?{" "}
-              <Link href="/signin" className="text-blue-600 hover:underline">
+              <Link href="/signin" className="text-blue-600 dark:text-blue-400 hover:underline">
                 Sign In
               </Link>
             </p>

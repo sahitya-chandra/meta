@@ -1,6 +1,6 @@
-'use client'
+"use client";
 
-import React, { useState, useEffect, useMemo, FormEvent } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useSession } from "next-auth/react";
 import Loader from "@/components/ui/loader";
 import Nav from "@/components/ui/nav";
@@ -14,14 +14,23 @@ const ChatPage = ({ token }: { token: string | undefined }) => {
   const [activeChatId, setActiveChatId] = useState<string>("");
   const [theme, setTheme] = useState("light");
   const [message, setMessage] = useState("");
-  const userId: string = session?.user?.id as string;
   const [allChats, setAllChats] = useState<Message[]>([]);
-  const { messages, typingUser, sendMessage, sendTyping, onlineUsers } = useChat(userId, token);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Handle friend click
+  const userId: string = session?.user?.id as string;
+  const bottomRef = useRef<HTMLDivElement | null>(null);
+
+  const { messages, typingUser, sendMessage, sendTyping, onlineUsers } =
+    useChat(userId, token);
+
+  const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
+    bottomRef.current?.scrollIntoView({ behavior, block: "end" });
+  };
+
   const handleSelectFriend = (id: string) => {
     setActiveChatId(id);
     setAllChats([]);
+    setSidebarOpen(false); // close sidebar on mobile
   };
 
   useEffect(() => {
@@ -30,20 +39,16 @@ const ChatPage = ({ token }: { token: string | undefined }) => {
     const fetchMessages = async () => {
       setLoading(true);
       try {
+        const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/messages?friendId=${activeChatId}&since=${new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()}`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+          `${process.env.NEXT_PUBLIC_API_URL}/api/messages?friendId=${activeChatId}&since=${since}`,
+          { headers: { Authorization: `Bearer ${token}` } }
         );
-        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        if (!res.ok) throw new Error(`HTTP error! ${res.status}`);
         const data = await res.json();
-        console.log("Fetched messages:", data);
-        // Only set messages that aren't already in the WebSocket messages
-        setAllChats(data.filter((msg: Message) => !messages.some((m) => m.id === msg.id)));
+        setAllChats(
+          data.filter((msg: Message) => !messages.some((m) => m.id === msg.id))
+        );
       } catch (err) {
         console.error("Error fetching messages:", err);
       } finally {
@@ -54,7 +59,6 @@ const ChatPage = ({ token }: { token: string | undefined }) => {
     fetchMessages();
   }, [activeChatId, token]);
 
-  // Theme handling
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme") || "light";
     setTheme(savedTheme);
@@ -68,7 +72,6 @@ const ChatPage = ({ token }: { token: string | undefined }) => {
     localStorage.setItem("theme", newTheme);
   };
 
-  // Fetch friends
   useEffect(() => {
     if (!userId || !token) return;
 
@@ -78,16 +81,11 @@ const ChatPage = ({ token }: { token: string | undefined }) => {
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/friends`,
           {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
+            headers: { Authorization: `Bearer ${token}` },
           }
         );
-        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        if (!res.ok) throw new Error(`HTTP error! ${res.status}`);
         const data = await res.json();
-        console.log("Fetched friends:", data)
         setFriends(data || []);
       } catch (err) {
         console.error("Error fetching friends:", err);
@@ -95,28 +93,36 @@ const ChatPage = ({ token }: { token: string | undefined }) => {
         setLoading(false);
       }
     };
-
     fetchFriends();
   }, [userId, token]);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!message.trim()) return;
-    console.log("Sending message:", message)
-    sendMessage(activeChatId, message)
+    if (!message.trim() || !activeChatId) return;
+    sendMessage(activeChatId, message);
     setMessage("");
-  }
+  };
 
   const uniqueMessages = useMemo(
     () =>
       [...allChats, ...messages]
         .filter(
-          (msg, index, self) =>
-            index === self.findIndex((m) => m.id === msg.id)
+          (msg, index, self) => index === self.findIndex((m) => m.id === msg.id)
         )
-        .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()),
+        .sort(
+          (a, b) =>
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        ),
     [allChats, messages]
   );
+
+  useEffect(() => {
+    if (activeChatId) scrollToBottom("auto");
+  }, [activeChatId]);
+
+  useEffect(() => {
+    scrollToBottom("smooth");
+  }, [uniqueMessages.length]);
 
   const memoizedFriends = useMemo(
     () =>
@@ -127,25 +133,30 @@ const ChatPage = ({ token }: { token: string | undefined }) => {
     [friends, onlineUsers]
   );
 
-  // Loading screen
   if (loading) return <Loader />;
 
   return (
     <div
-      className="grid grid-rows-[60px_1fr] h-screen"
+      className="flex flex-col h-screen"
       style={{ background: "var(--background)", color: "var(--foreground)" }}
     >
-      <Nav toggleTheme={toggleTheme} theme={theme} />
+      {/* Navbar with sidebar toggle for mobile */}
+      <Nav toggleTheme={toggleTheme} theme={theme}>
+        <button
+          className="sm:hidden px-3 py-1 rounded bg-[var(--special)] text-[var(--background)] ml-2"
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+        >
+          {sidebarOpen ? "Close" : "Friends"}
+        </button>
+      </Nav>
 
-      {/* Body */}
-      <div className="grid grid-cols-[280px_1fr]">
+      {/* Layout */}
+      <div className="flex flex-1 overflow-hidden min-h-0 relative">
         {/* Sidebar */}
         <aside
-          className="flex flex-col"
-          style={{
-            background: "var(--muted)",
-            borderRight: "1px solid var(--muted-foreground)",
-          }}
+          className={`absolute sm:static z-30 top-0 left-0 h-full w-64 flex-col min-h-0 transform bg-[var(--muted)] border-r border-[var(--muted-foreground)] transition-transform duration-300 ${
+            sidebarOpen ? "translate-x-0" : "-translate-x-full sm:translate-x-0"
+          }`}
         >
           <div
             className="p-4 font-semibold"
@@ -153,7 +164,7 @@ const ChatPage = ({ token }: { token: string | undefined }) => {
           >
             Friends
           </div>
-          <ul className="flex-1 overflow-y-auto">
+          <ul className="flex-1 overflow-y-auto no-scrollbar">
             {memoizedFriends.length === 0 ? (
               <p className="p-3" style={{ color: "var(--muted-foreground)" }}>
                 No friends yet
@@ -178,9 +189,7 @@ const ChatPage = ({ token }: { token: string | undefined }) => {
                   <span
                     className="w-3 h-3 rounded-full"
                     style={{
-                      backgroundColor: onlineUsers.includes(friend.id)
-                        ? "#22c55e" // Green
-                        : "#ef4444", // Red
+                      backgroundColor: friend.isOnline ? "#22c55e" : "#ef4444",
                     }}
                   />
                   {friend.name || friend.email}
@@ -190,31 +199,39 @@ const ChatPage = ({ token }: { token: string | undefined }) => {
           </ul>
         </aside>
 
-        {/* Chat area */}
-        <main className="flex flex-col">
+        {/* Chat Area */}
+        <main className="relative flex flex-col flex-1 min-h-0 w-full">
+          {/* Background */}
+          {theme === "light" ? (
+            <div className="absolute inset-0 w-full h-full bg-white bg-[repeating-linear-gradient(45deg,#d1d5db_0px,#d1d5db_2px,transparent_2px,transparent_24px)] bg-[size:24px_24px] opacity-50 pointer-events-none" />
+          ) : (
+            <div className="absolute inset-0 w-full h-full bg-black bg-[repeating-linear-gradient(45deg,#52525b_0px,#52525b_2px,transparent_2px,transparent_24px)] bg-[size:24px_24px] opacity-20 pointer-events-none" />
+          )}
+
           {activeChatId === "" ? (
             <div
-              className="flex-1 flex items-center justify-center text-center"
+              className="flex-1 flex items-center justify-center text-center relative z-10"
               style={{ color: "var(--muted-foreground)" }}
             >
               Select a friend to start chatting
             </div>
           ) : (
             <>
-              {/* Chat header */}
+              {/* Chat Header */}
               <div
-                className="p-4 font-semibold"
+                className="p-4 font-semibold relative z-10"
                 style={{
                   background: "var(--muted)",
                   borderBottom: "1px solid var(--muted-foreground)",
                 }}
               >
                 Chat with{" "}
-                {memoizedFriends.find((f) => f.id === activeChatId)?.name || "Friend"}
+                {memoizedFriends.find((f) => f.id === activeChatId)?.name ||
+                  "Friend"}
               </div>
 
               {/* Messages */}
-              <div className="flex-1 p-4 overflow-y-auto space-y-3">
+              <div className="flex-1 min-h-0 p-4 overflow-y-auto space-y-3 relative z-10 scroll-smooth no-scrollbar">
                 {uniqueMessages.map((msg) => (
                   <div
                     key={msg.id}
@@ -237,19 +254,24 @@ const ChatPage = ({ token }: { token: string | undefined }) => {
                     {msg.content}
                   </div>
                 ))}
+
                 {typingUser === activeChatId && (
                   <div
                     className="p-2 rounded-lg w-fit text-sm italic"
                     style={{ color: "var(--muted-foreground)" }}
                   >
-                    {memoizedFriends.find((f) => f.id === activeChatId)?.name || "Friend"} is typing...
+                    {memoizedFriends.find((f) => f.id === activeChatId)?.name ||
+                      "Friend"}{" "}
+                    is typing...
                   </div>
                 )}
+
+                <div ref={bottomRef} />
               </div>
-              
-              {/* Message input */}
+
+              {/* Input */}
               <form
-                className="p-4 flex gap-2"
+                className="p-4 bg-[var(--background)] flex gap-2 sticky bottom-0 z-20"
                 style={{ borderTop: "1px solid var(--muted-foreground)" }}
                 onSubmit={handleSubmit}
               >

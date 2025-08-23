@@ -1,6 +1,6 @@
-import React from 'react'
+import React, { ReactNode } from 'react'
 
-export default function Chat({message}: { message: any}) {
+export default function Chat({message}: { message: ReactNode}) {
 
   return (
     <div>

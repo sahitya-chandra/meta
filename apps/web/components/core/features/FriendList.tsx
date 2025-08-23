@@ -4,9 +4,10 @@ import React, { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import Loader from "@/components/ui/loader";
 import Nav from "@/components/ui/nav";
+import { Friend } from "@/lib/types";
 
-export default function FriendList({ token }: { token: string }) {
-  const [friends, setFriends] = useState<any[]>([]);
+export default function FriendList({ token }: { token: string | undefined }) {
+  const [friends, setFriends] = useState<Friend[]>([]);
   const [loading, setLoading] = useState(true);
   const { data: session } = useSession();
   const [theme, setTheme] = useState("light");

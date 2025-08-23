@@ -1,10 +1,10 @@
-"use client";
+"use client"
 
-import Loader from "@/components/ui/loader";
-import Nav from "@/components/ui/nav";
-import { useSession, signOut } from "next-auth/react";
-import Head from "next/head";
-import { useEffect, useState, useRef } from "react";
+import Loader from "@/components/ui/loader"
+import Nav from "@/components/ui/nav"
+import { useSession, signOut } from "next-auth/react"
+import Head from "next/head"
+import { useEffect, useState } from "react"
 
 export default function Home() {
   return <HomeContent />;
@@ -84,16 +84,9 @@ function HomeContent() {
                     Manage incoming requests.
                   </p>
                 </a>
-                <a
-                  href="/friendlist"
-                  className="group block p-6 rounded-xl border border-muted bg-background hover:shadow-lg hover:-translate-y-1 transition-all"
-                >
-                  <h3 className="text-lg font-semibold group-hover:text-[var(--special)]">
-                    Friend List
-                  </h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    See who you're connected with.
-                  </p>
+                <a href="/friendlist" className="group block p-6 rounded-xl border border-muted bg-background hover:shadow-lg hover:-translate-y-1 transition-all">
+                  <h3 className="text-lg font-semibold group-hover:text-[var(--special)]">Friend List</h3>
+                  <p className="text-sm text-muted-foreground mt-1">See who you&apos;re connected with.</p>
                 </a>
                 <a
                   href="/chatpage"

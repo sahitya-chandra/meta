@@ -1,15 +1,15 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useSession, signIn, signOut } from "next-auth/react";
-import Link from "next/link";
+import { useSession } from "next-auth/react";
 import Loader from "@/components/ui/loader";
 import Nav from "@/components/ui/nav";
+import { Requests, User } from "@/lib/types";
 
-export default function FriendReq({ token }: { token?: any }) {
-  const [requests, setRequests] = useState<any[]>([]);
+export default function FriendReq({ token }: { token: string | undefined }) {
+  const [requests, setRequests] = useState<Requests[]>([]);
   const [query, setQuery] = useState("");
-  const [searchResult, setSearchResult] = useState<any | null>(null);
+  const [searchResult, setSearchResult] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
   const [theme, setTheme] = useState("light");
 
@@ -31,6 +31,7 @@ export default function FriendReq({ token }: { token?: any }) {
   };
 
   useEffect(() => {
+    if(!token) return
     const fetchRequests = async () => {
       if (!selfId) return;
       setLoading(true);
@@ -47,7 +48,7 @@ export default function FriendReq({ token }: { token?: any }) {
       setLoading(false);
     };
     fetchRequests();
-  }, [selfId]);
+  }, [selfId, token]);
 
   const handleSearch = async () => {
     if (!query.trim()) return;
@@ -168,7 +169,7 @@ export default function FriendReq({ token }: { token?: any }) {
             <p className="text-[var(--muted-foreground)]">No pending requests</p>
           ) : (
             <ul className="space-y-2">
-              {requests.map((req: any) => (
+              {requests.map((req: Requests) => (
                 <li
                   key={req.id}
                   className="flex justify-between items-center border border-[var(--muted)] p-3 rounded"

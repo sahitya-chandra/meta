@@ -1,18 +1,11 @@
 import { useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { throttle } from "lodash";
-
-export type Message = {
-  id: string;
-  senderId: string;
-  receiverId: string;
-  content: string;
-  createdAt: string;
-};
+import { Message } from "@/lib/types";
 
 let socket: Socket | null = null;
 
-export function useChat(userId: string, token: string) {
+export function useChat(userId: string, token: string | undefined) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [friendRequests, setFriendRequests] = useState<any[]>([]);
   const [typingUser, setTypingUser] = useState<string | null>(null);

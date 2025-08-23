@@ -1,15 +1,16 @@
-"use client";
+"use client"
 
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useSession } from "next-auth/react";
 import Loader from "@/components/ui/loader";
 import Nav from "@/components/ui/nav";
-import { Message, useChat } from "@/hooks/useChat";
+import { useChat } from "@/hooks/useChat";
+import { Friend, Message } from "@/lib/types";
 
-const ChatPage = ({ token }: { token: any }) => {
+const ChatPage = ({ token }: { token: string | undefined }) => {
   const { data: session } = useSession();
   const [loading, setLoading] = useState(true);
-  const [friends, setFriends] = useState<any[]>([]);
+  const [friends, setFriends] = useState<Friend[]>([]);
   const [activeChatId, setActiveChatId] = useState<string>("");
   const [theme, setTheme] = useState("light");
   const [message, setMessage] = useState("");
@@ -27,6 +28,7 @@ const ChatPage = ({ token }: { token: any }) => {
   };
 
   const handleSelectFriend = (id: string) => {
+    if(id === activeChatId) return
     setActiveChatId(id);
     setAllChats([]);
     setSidebarOpen(false); // close sidebar on mobile
@@ -41,7 +43,10 @@ const ChatPage = ({ token }: { token: any }) => {
         const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/messages?friendId=${activeChatId}&since=${since}`,
-          { headers: { Authorization: `Bearer ${token}` } }
+          { 
+            method: "GET",
+            headers: { Authorization: `Bearer ${token}` } 
+          }
         );
         if (!res.ok) throw new Error(`HTTP error! ${res.status}`);
         const data = await res.json();
@@ -80,6 +85,7 @@ const ChatPage = ({ token }: { token: any }) => {
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/friends`,
           {
+            method: "GET",
             headers: { Authorization: `Bearer ${token}` },
           }
         );
@@ -158,7 +164,7 @@ const ChatPage = ({ token }: { token: any }) => {
           }`}
         >
           <div
-            className="p-4 font-semibold"
+            className="p-5 font-semibold"
             style={{ borderBottom: "1px solid var(--muted-foreground)" }}
           >
             Friends

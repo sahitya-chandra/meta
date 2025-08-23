@@ -4,15 +4,10 @@ import { z } from "zod";
 import { userSockets } from "../utils/utils";
 import { io } from "..";
 import { AuthenticatedRequest } from "../types";
+import { sendFriendRequestSchema } from "@meta/types"
+import { friendRequestActionSchema } from "@meta/types";
 
-const sendFriendRequestSchema = z.object({
-  selfId: z.string().optional(),
-  friendId: z.string(),
-});
 
-const friendRequestActionSchema = z.object({
-  requestId: z.string(),
-});
 
 export const getUserByEmail = async (req: Request, res: Response) => {
   const { email } = req.query;
@@ -66,7 +61,7 @@ export const sendFriendRequest = async (req: AuthenticatedRequest, res: Response
   const selfId = req.userId;
   if (!selfId) return res.status(401).json({ error: "Unauthorized" });
   console.log("Body:", req.body);
-  const parsed = sendFriendRequestSchema.safeParse(req.body);
+  const parsed = await sendFriendRequestSchema.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({ msg : "Not valid due to type" });
   }

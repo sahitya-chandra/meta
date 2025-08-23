@@ -17,6 +17,17 @@ export const UpdateUserSchema = z.object({
   password: z.string().min(6).optional(),
 });
 
+export const sendFriendRequestSchema = z.object({
+  selfId: z.string().optional(),
+  friendId: z.string(),
+});
+
+export const friendRequestActionSchema = z.object({
+  requestId: z.string(),
+});
+
 export type SignUpInput = z.infer<typeof SignUpSchema>;
 export type LoginInput = z.infer<typeof LoginSchema>;
 export type UpdateUserInput = z.infer<typeof UpdateUserSchema>;
+export type SendFriendRequestInput = z.infer<typeof sendFriendRequestSchema>;
+export type FriendRequestActionInput = z.infer<typeof friendRequestActionSchema>;

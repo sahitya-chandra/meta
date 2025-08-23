@@ -14,6 +14,8 @@ export const setupSockets = (io: Server) => {
     console.log(`User ${socket.userId} connected with socket ${socket.id}`);
     console.log("Current userSockets:", Array.from(userSockets.entries()));
 
+    io.emit("onlineUsers", Array.from(userSockets.keys()));
+
     socket.on("sendMessage", async (payload: { toUserId: string; content: string }) => {
       console.log("Received sendMessage:", payload);
       const { toUserId, content } = payload;
@@ -65,6 +67,7 @@ export const setupSockets = (io: Server) => {
       userSockets.delete(socket.userId!);
       console.log(`User ${socket.userId} disconnected`);
       console.log("Current userSockets:", Array.from(userSockets.entries()));
+      io.emit("onlineUsers", Array.from(userSockets.keys()));
     });
   });
 };

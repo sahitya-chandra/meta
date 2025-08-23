@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
+import { throttle } from "lodash";
 
 export type Message = {
   id: string;
@@ -15,6 +16,7 @@ export function useChat(userId: string, token: string) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [friendRequests, setFriendRequests] = useState<any[]>([]);
   const [typingUser, setTypingUser] = useState<string | null>(null);
+  const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
 
   useEffect(() => {
     if (!token || !userId) return;
@@ -59,6 +61,11 @@ export function useChat(userId: string, token: string) {
         setTimeout(() => setTypingUser(null), 2000);
       });
 
+      socket.on("onlineUsers", (users: string[]) => {
+        console.log("Received onlineUsers:", users);
+        setOnlineUsers(users);
+      });
+
       socket.on("error", (err: string) => {
         console.error("Socket error:", err);
       });
@@ -74,6 +81,7 @@ export function useChat(userId: string, token: string) {
         socket.off("newMessage");
         socket.off("messageSent");
         socket.off("userTyping");
+        socket.off("onlineUsers");
         socket.off("error");
         socket.disconnect();
         socket = null;
@@ -88,12 +96,12 @@ export function useChat(userId: string, token: string) {
     }
   };
 
-  const sendTyping = (toUserId: string) => {
+  const sendTyping = throttle((toUserId: string) => {
     if (socket) {
-      console.log("Sending typing to:", toUserId);
-      socket.emit("typing", toUserId);
+        console.log("Sending typing to:", toUserId);
+        socket.emit("typing", toUserId);
     }
-  };
+  }, 1000);
 
-  return { messages, friendRequests, typingUser, sendMessage, sendTyping };
+  return { messages, friendRequests, typingUser, sendMessage, sendTyping, onlineUsers };
 }

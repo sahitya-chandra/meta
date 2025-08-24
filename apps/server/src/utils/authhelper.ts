@@ -20,8 +20,8 @@ async function getDerivedEncryptionKey(secret: string, salt: string) {
   return new Uint8Array(keyBuffer);
 }
 
-export async function decryptToken(token: string, isDev: boolean) {
-  const salt = isDev ? 'authjs.session-token' : '__Secure-authjs.session-token';
+export async function decryptToken(token: string, isDev: string) {
+  const salt = isDev === "development" ? 'authjs.session-token' : '__Secure-authjs.session-token';
 
   const encryptionKey = await getDerivedEncryptionKey(AUTH_SECRET, salt);
 

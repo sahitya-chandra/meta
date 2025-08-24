@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useSession } from "next-auth/react";
@@ -28,7 +28,7 @@ const ChatPage = ({ token }: { token: string | undefined }) => {
   };
 
   const handleSelectFriend = (id: string) => {
-    if(id === activeChatId) return
+    if (id === activeChatId) return;
     setActiveChatId(id);
     setAllChats([]);
     setSidebarOpen(false); // close sidebar on mobile
@@ -43,9 +43,9 @@ const ChatPage = ({ token }: { token: string | undefined }) => {
         const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/messages?friendId=${activeChatId}&since=${since}`,
-          { 
+          {
             method: "GET",
-            headers: { Authorization: `Bearer ${token}` } 
+            headers: { Authorization: `Bearer ${token}` },
           }
         );
         if (!res.ok) throw new Error(`HTTP error! ${res.status}`);
@@ -236,15 +236,15 @@ const ChatPage = ({ token }: { token: string | undefined }) => {
               </div>
 
               {/* Messages */}
-              <div className="flex-1 min-h-0 p-4 overflow-y-auto space-y-3 relative z-10 scroll-smooth no-scrollbar">
+              <div className="flex-1 min-h-0 p-4 overflow-y-auto space-y-3 relative z-10 scroll-smooth no-scrollbar whitespace-normal break-all">
                 {uniqueMessages.map((msg) => (
                   <div
                     key={msg.id}
-                    className={
+                    className={`group relative max-w-[80%] ${
                       msg.senderId !== userId
                         ? "p-2 rounded-lg w-fit"
                         : "p-2 rounded-lg w-fit ml-auto"
-                    }
+                    }`}
                     style={{
                       background:
                         msg.senderId !== userId
@@ -257,6 +257,20 @@ const ChatPage = ({ token }: { token: string | undefined }) => {
                     }}
                   >
                     {msg.content}
+{/* Timestamp */}
+<span
+  className={`
+    absolute ${msg.senderId !== userId ? "-right-10" : "-left-10"} bottom-1 text-xs text-gray-500
+   hidden group-hover:block sm:group-hover:block
+    
+  `}
+>
+  {new Date(msg.createdAt).toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  })}
+</span>
+
                   </div>
                 ))}
 

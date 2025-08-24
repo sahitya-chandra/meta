@@ -273,9 +273,9 @@ const ChatPage = ({ token }: { token: string | undefined }) => {
                   </div>
                 ))}
 
-                {typingUser === activeChatId && (
+                {(
                   <div
-                    className="p-2 rounded-lg w-fit text-sm italic"
+                    className={`p-2 rounded-lg w-fit text-sm italic mb-10 ${typingUser === activeChatId ? 'opacity-100' : 'opacity-0'}`}
                     style={{ color: 'var(--muted-foreground)' }}
                   >
                     {memoizedFriends.find(f => f.id === activeChatId)?.name ||

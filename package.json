@@ -12,7 +12,22 @@
     "dev:server": "npm --workspace apps/server run dev",
     "dev": "concurrently \"npm run dev:web\" \"npm run dev:server\"",
     "db:migrate": "npx prisma migrate dev",
-    "db:studio": "npx prisma studio"
+    "db:studio": "npx prisma studio",
+    "lint": "eslint . --ext .ts,.tsx,.js,.jsx --ignore-pattern 'apps/web/**'",
+    "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix --ignore-pattern 'apps/web/**'",
+    "lint:web": "cd apps/web && npm run lint",
+    "lint:web:fix": "cd apps/web && npm run lint:fix",
+    "lint:all": "npm run lint && npm run lint:web",
+    "lint:all:fix": "npm run lint:fix && npm run lint:web:fix",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\" --ignore-path .prettierignore",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\" --ignore-path .prettierignore",
+    "type-check": "npm run type-check:server && npm run type-check:web",
+    "type-check:server": "cd apps/server && npm run type-check",
+    "type-check:web": "cd apps/web && npx tsc --noEmit",
+    "build": "npm run build:packages && npm run build:server && npm run build:web",
+    "build:packages": "npm --workspace packages/db run build",
+    "build:server": "npm --workspace apps/server run build",
+    "build:web": "npm --workspace apps/web run build"
   },
   "repository": {
     "type": "git",
@@ -32,10 +47,15 @@
     "nodemon": "^3.1.10",
     "prisma": "^6.14.0",
     "tsx": "^4.20.4",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "@eslint/js": "^9.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": "^9.0.0",
+    "typescript-eslint": "^8.0.0",
+    "prettier": "^3.0.0"
   },
   "dependencies": {
-    "@auth/prisma-adapter": "^2.10.0",
     "@meta/db": "^1.0.0"
   },
   "packageManager": "yarn@4.5.3+sha512.3003a14012e2987072d244c720506549c1aab73ee728208f1b2580a9fd67b92d61ba6b08fe93f6dce68fd771e3af1e59a0afa28dd242dd0940d73b95fedd4e90"

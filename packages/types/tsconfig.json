@@ -3,8 +3,8 @@
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": ".",
-    "composite": true,         // allow project references if you use them later
-    "declaration": true,       // emit .d.ts files
+    "composite": true, // allow project references if you use them later
+    "declaration": true, // emit .d.ts files
     "declarationMap": true
   },
   "include": ["index.ts"],

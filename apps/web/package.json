@@ -6,9 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "lint:fix": "next lint --fix"
   },
   "dependencies": {
+    "@auth/prisma-adapter": "^2.10.0",
     "@meta/db": "^1.0.0",
     "@meta/types": "^1.0.0",
     "@radix-ui/react-label": "^2.1.7",

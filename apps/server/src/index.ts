@@ -1,26 +1,26 @@
-import express from "express";
+import express from 'express';
 import http from 'http';
-import cors from "cors";
+import cors from 'cors';
 import dotenv from 'dotenv';
-import { PORT } from "./config.js";
-import friendRoutes from "./Routes/route.js";
-import { setupSockets } from "./sockets/index.js";
-import { initIo } from "./utils/socketInstance.js";
+import { PORT } from './config.js';
+import friendRoutes from './Routes/route.js';
+import { setupSockets } from './sockets/index.js';
+import { initIo } from './utils/socketInstance.js';
 
-dotenv.config()
+dotenv.config();
 
 const app = express();
-app.use(cors(
-  {
-    origin: "http://localhost:3000",
-    credentials: true
-  }
-));
+app.use(
+  cors({
+    origin: 'http://localhost:3000',
+    credentials: true,
+  })
+);
 app.use(express.json());
-app.use("/api", friendRoutes); 
+app.use('/api', friendRoutes);
 
-const server = http.createServer(app)
-export const io = initIo(server)
+const server = http.createServer(app);
+export const io = initIo(server);
 
 setupSockets(io);
 

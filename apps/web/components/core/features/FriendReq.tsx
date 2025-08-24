@@ -1,37 +1,37 @@
-"use client";
+'use client';
 
-import React, { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
-import Loader from "@/components/ui/loader";
-import Nav from "@/components/ui/nav";
-import { Requests, User } from "@/lib/types";
+import React, { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import Loader from '@/components/ui/loader';
+import Nav from '@/components/ui/nav';
+import { Requests, User } from '@/lib/types';
 
 export default function FriendReq({ token }: { token: string | undefined }) {
   const [requests, setRequests] = useState<Requests[]>([]);
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState('');
   const [searchResult, setSearchResult] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
-  const [theme, setTheme] = useState("light");
+  const [theme, setTheme] = useState('light');
 
   const { data: session } = useSession();
   const selfId = session?.user?.id;
 
   // Theme handling
   useEffect(() => {
-    const savedTheme = localStorage.getItem("theme") || "light";
+    const savedTheme = localStorage.getItem('theme') || 'light';
     setTheme(savedTheme);
-    document.documentElement.classList.toggle("dark", savedTheme === "dark");
+    document.documentElement.classList.toggle('dark', savedTheme === 'dark');
   }, []);
-  
+
   const toggleTheme = () => {
-    const newTheme = theme === "dark" ? "light" : "dark";
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
     setTheme(newTheme);
-    document.documentElement.classList.toggle("dark", newTheme === "dark");
-    localStorage.setItem("theme", newTheme);
+    document.documentElement.classList.toggle('dark', newTheme === 'dark');
+    localStorage.setItem('theme', newTheme);
   };
 
   useEffect(() => {
-    if(!token) return
+    if (!token) return;
     const fetchRequests = async () => {
       if (!selfId) return;
       setLoading(true);
@@ -69,44 +69,50 @@ export default function FriendReq({ token }: { token: string | undefined }) {
   const handleSendRequest = async (friendId: string) => {
     setLoading(true);
     await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/friend-requests`, {
-      method: "POST",
+      method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({ selfId, friendId }),
-      credentials: "include",
+      credentials: 'include',
     });
     setSearchResult(null);
-    setQuery("");
+    setQuery('');
     setLoading(false);
   };
 
   const handleAccept = async (id: string) => {
     setLoading(true);
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/accept-friend-request`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ requestId: id }),
-    });
-    setRequests((prev) => prev.filter((r) => r.id !== id));
+    await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/accept-friend-request`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ requestId: id }),
+      }
+    );
+    setRequests(prev => prev.filter(r => r.id !== id));
     setLoading(false);
   };
 
   const handleReject = async (id: string) => {
     setLoading(true);
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/reject-friend-request`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ requestId: id }),
-    });
-    setRequests((prev) => prev.filter((r) => r.id !== id));
+    await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/reject-friend-request`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ requestId: id }),
+      }
+    );
+    setRequests(prev => prev.filter(r => r.id !== id));
     setLoading(false);
   };
 
@@ -115,7 +121,6 @@ export default function FriendReq({ token }: { token: string | undefined }) {
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
       <Nav toggleTheme={toggleTheme} theme={theme} />
-
 
       {/* Page Content */}
       <div className="p-6 mt-15 space-y-6">
@@ -128,21 +133,21 @@ export default function FriendReq({ token }: { token: string | undefined }) {
               type="text"
               placeholder="Enter email..."
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={e => setQuery(e.target.value)}
               className="border border-[var(--muted)] bg-[var(--background)] text-[var(--foreground)] p-2 rounded w-full"
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && query.trim() !== "") {
+              onKeyDown={e => {
+                if (e.key === 'Enter' && query.trim() !== '') {
                   handleSearch();
                 }
               }}
             />
             <button
               onClick={() => query.trim() && handleSearch()}
-              disabled={query.trim() === ""}
+              disabled={query.trim() === ''}
               className={`px-3 py-2 rounded text-white ${
-                query.trim() === ""
-                  ? "bg-[var(--muted)] cursor-not-allowed"
-                  : "bg-[var(--special)] hover:opacity-90"
+                query.trim() === ''
+                  ? 'bg-[var(--muted)] cursor-not-allowed'
+                  : 'bg-[var(--special)] hover:opacity-90'
               }`}
             >
               Search
@@ -166,7 +171,9 @@ export default function FriendReq({ token }: { token: string | undefined }) {
         <div>
           <h1 className="text-xl font-bold mb-4">Friend Requests</h1>
           {requests.length === 0 ? (
-            <p className="text-[var(--muted-foreground)]">No pending requests</p>
+            <p className="text-[var(--muted-foreground)]">
+              No pending requests
+            </p>
           ) : (
             <ul className="space-y-2">
               {requests.map((req: Requests) => (
@@ -177,7 +184,7 @@ export default function FriendReq({ token }: { token: string | undefined }) {
                   <span>
                     {req.requester?.name
                       ? `${req.requester.name} (${req.requester.email})`
-                      : req.requester?.email || "Unknown User"}
+                      : req.requester?.email || 'Unknown User'}
                   </span>
                   <div className="space-x-2">
                     <button

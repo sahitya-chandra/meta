@@ -1,0 +1,18 @@
+# .prettierignore (root)
+node_modules/
+dist/
+build/
+.next/
+coverage/
+.env*
+*.log
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Generated files
+prisma/migrations/
+*.generated.*
+
+# Specific files
+README.md

@@ -126,14 +126,14 @@ export default function Signup() {
 
             {error && <p className="text-red-500 text-sm">{error}</p>}
 
-            <Button type="submit" disabled={loading} className="w-full py-3">
+            <Button type="submit" disabled={loading} className="w-full py-3 border border-gray-400 hover:border-gray-300 hover:bg-[var(--special)]">
               {loading ? "Creating account..." : "Create Account"}
             </Button>
 
             <Button
               type="button"
               variant="outline"
-              className="w-full bg-transparent py-3 dark:border-gray-600 dark:text-gray-200"
+              className="w-full py-3 border border-gray-400 hover:scale-105 hover:cursor-pointer"
               onClick={() => signIn("github", { callbackUrl: "/" })}
             >
               Sign Up with GitHub

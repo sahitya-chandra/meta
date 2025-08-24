@@ -124,7 +124,7 @@ export default function Signin() {
           <CardFooter className="flex flex-col gap-3 pt-2">
             <Button
               type="submit"
-              className="w-full py-3"
+              className="w-full py-3 border border-gray-400 hover:border-gray-300 hover:bg-[var(--special)]"
               disabled={loading}
             >
               {loading ? "Signing in..." : "Sign In"}
@@ -132,7 +132,7 @@ export default function Signin() {
             <Button
               type="button"
               variant="outline"
-              className="w-full bg-transparent py-3 dark:text-white dark:border-gray-600"
+              className="w-full py-3 border border-gray-400 hover:scale-105 hover:cursor-pointer]"
               onClick={() => signIn("github", { callbackUrl: "/" })}
             >
               Sign In with GitHub

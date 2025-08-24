@@ -1,5 +1,5 @@
-import { Moon, Sun } from "lucide-react";
-import React, { ReactNode } from "react";
+import { Moon, Sun } from 'lucide-react';
+import React, { ReactNode } from 'react';
 
 type NavProps = {
   toggleTheme: () => void;
@@ -14,7 +14,7 @@ const Nav: React.FC<NavProps> = ({ toggleTheme, theme, children }) => {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <span
             className="text-2xl font-extrabold text-[var(--special)] cursor-pointer"
-            onClick={() => (window.location.href = "/")}
+            onClick={() => (window.location.href = '/')}
           >
             Meta
           </span>
@@ -25,7 +25,7 @@ const Nav: React.FC<NavProps> = ({ toggleTheme, theme, children }) => {
               onClick={toggleTheme}
               className="w-10 h-10 flex items-center justify-center rounded-full bg-muted text-foreground hover:bg-muted-foreground hover:text-background transition-colors shadow-sm"
             >
-              {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+              {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
             </button>
           </div>
         </div>
@@ -34,4 +34,4 @@ const Nav: React.FC<NavProps> = ({ toggleTheme, theme, children }) => {
   );
 };
 
-export default Nav
+export default Nav;

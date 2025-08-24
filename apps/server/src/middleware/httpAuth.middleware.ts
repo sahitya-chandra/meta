@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { decryptToken } from '../utils/authhelper';
 import { AuthenticatedRequest } from '../types';
+import { NODE_ENV } from '../config';
 
 export const httpAuthMiddleware = async (
   req: Request,
@@ -25,7 +26,7 @@ export const httpAuthMiddleware = async (
     }
 
     console.log('Token by md :', token);
-    const payload = await decryptToken(token, true);
+    const payload = await decryptToken(token, NODE_ENV);
     if (!payload?.sub) {
       return res.status(401).json({ error: 'Invalid token payload' });
     }

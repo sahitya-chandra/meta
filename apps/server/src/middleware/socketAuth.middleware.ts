@@ -1,6 +1,7 @@
 import { Socket } from 'socket.io';
 import { AuthenticatedSocket } from '../types';
 import { decryptToken } from '../utils/authhelper';
+import { NODE_ENV } from '../config';
 
 export const wsAuthMiddleware = async (
   socket: Socket,
@@ -13,7 +14,7 @@ export const wsAuthMiddleware = async (
       return next(new Error('Authentication error: No token provided'));
     }
 
-    const payload = await decryptToken(token, true);
+    const payload = await decryptToken(token, NODE_ENV);
 
     if (!payload?.sub) {
       return next(new Error('Authentication error: Invalid token payload'));

@@ -1,7 +1,7 @@
 import { Server } from 'socket.io';
 import { userSockets } from '../utils/utils';
 import { AuthenticatedSocket } from '../types';
-import prisma from '@meta/db';
+import prisma from '@repo/db';
 import { wsAuthMiddleware } from '../middleware/socketAuth.middleware';
 
 export const setupSockets = (io: Server) => {

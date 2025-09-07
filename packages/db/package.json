@@ -1,18 +1,23 @@
 {
-  "name": "@meta/db",
-  "version": "1.0.0",
-  "main": "index.js",
-  "types": "index.ts",
+  "name": "@repo/db",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "scripts": {
     "build": "tsc",
-    "prisma:generate": "prisma generate",
-    "prepare": "npm run build"
+    "generate": "prisma generate",
+    "migrate": "prisma migrate dev",
+    "studio": "prisma studio"
   },
   "devDependencies": {
-    "typescript": "^5.9.2",
-    "prisma": "^6.14.0"
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "prisma": "^6.14.0",
+    "typescript": "^5.9.2"
   },
   "dependencies": {
-    "@prisma/client": "^6.14.0"
+    "@prisma/client": "^6.15.0"
   }
 }

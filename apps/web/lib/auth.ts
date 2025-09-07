@@ -2,8 +2,8 @@ import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import GithubProvider from 'next-auth/providers/github';
 import { PrismaAdapter } from '@auth/prisma-adapter';
-import prisma from '@meta/db';
-import { LoginSchema } from '@meta/types';
+import prisma from '@repo/db';
+import { LoginSchema } from '@repo/types';
 import { compareSync } from 'bcrypt-ts';
 
 export const { handlers, signIn, signOut, auth } = NextAuth({

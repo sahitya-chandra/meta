@@ -1,5 +1,5 @@
-import prisma from '@meta/db';
-import { SignUpInput, SignUpSchema } from '@meta/types';
+import prisma from '@repo/db';
+import { SignUpInput, SignUpSchema } from '@repo/types';
 import { genSaltSync, hashSync } from 'bcrypt-ts';
 
 export async function POST(request: Request) {

@@ -1,12 +1,22 @@
 {
-  "name": "@meta/types",
+  "name": "@repo/types",
   "version": "1.0.0",
-  "main": "index.js",
+  "private": true,
+  "exports": {
+    ".": "./index.ts"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*"
+  },
+  "dependencies": {
+    "zod": "^4.1.5"
+  }
 }

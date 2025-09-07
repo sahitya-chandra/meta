@@ -1,10 +1,10 @@
-import prisma from '@meta/db';
+import prisma from '@repo/db';
 import { Request, Response } from 'express';
 import { userSockets } from '../utils/utils';
 import { io } from '..';
 import { AuthenticatedRequest } from '../types';
-import { sendFriendRequestSchema } from '@meta/types';
-import { friendRequestActionSchema } from '@meta/types';
+import { sendFriendRequestSchema } from '@repo/types';
+import { friendRequestActionSchema } from '@repo/types';
 
 export const getUserByEmail = async (req: Request, res: Response) => {
   const { email } = req.query;

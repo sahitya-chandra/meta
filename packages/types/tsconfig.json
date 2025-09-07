@@ -1,12 +1,8 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "@repo/typescript-config/base.json",
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules"],
   "compilerOptions": {
-    "outDir": "dist",
-    "rootDir": ".",
-    "composite": true, // allow project references if you use them later
-    "declaration": true, // emit .d.ts files
-    "declarationMap": true
-  },
-  "include": ["index.ts"],
-  "exclude": ["node_modules", "dist"]
+    "outDir": "./dist"
+  }
 }

@@ -1,0 +1,23 @@
+{
+  "name": "@repo/trpc",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/root.ts",
+    "./trpc": "./src/trpc.ts"
+  },
+  "scripts": {
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*"
+  },
+  "dependencies": {
+    "@trpc/server": "^11.5.1",
+    "zod": "^4.1.5",
+    "@repo/db": "workspace:*",
+    "@repo/types": "workspace:*",
+    "@repo/auth": "workspace:*"
+  }
+}
